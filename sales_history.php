@@ -188,7 +188,7 @@ font-size:14px;
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="add_products.php" class="active">
+<a href="sales_history.php" class="active">
 <i class="fas fa-plus-circle"></i> Add Products
 </a>
 
