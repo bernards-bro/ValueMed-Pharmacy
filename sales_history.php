@@ -188,7 +188,7 @@ font-size:14px;
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="sales_history.php" class="active">
+<a href="add_products.php">
 <i class="fas fa-plus-circle"></i> Add Products
 </a>
 
@@ -206,7 +206,7 @@ font-size:14px;
 <i class="fas fa-cash-register"></i> Point of Sales
 </a>
 
-<a href="sales_history.php">
+<a href="sales_history.php" class="active">
 <i class="fas fa-clock"></i> Sales History
 </a>
 

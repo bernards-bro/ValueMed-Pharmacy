@@ -188,7 +188,7 @@ font-size:14px;
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="pos.php" class="active">
+<a href="add_products.php">
 <i class="fas fa-plus-circle"></i> Add Products
 </a>
 
@@ -202,7 +202,7 @@ font-size:14px;
 
 <div class="menu-title">SALES</div>
 
-<a href="pos.php">
+<a href="pos.php" class="active">
 <i class="fas fa-cash-register"></i> Point of Sales
 </a>
 
