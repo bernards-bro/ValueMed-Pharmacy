@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Reports</title>
+<title>Sales History</title>
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -24,8 +25,6 @@ background:#F5F7FC;
 display:flex;
 }
 
-/* Sidebar */
-
 .sidebar{
 width:250px;
 height:100vh;
@@ -36,13 +35,13 @@ color:white;
 
 .logo{
 padding:25px;
-text-align:center;
 font-size:24px;
 font-weight:bold;
+text-align:center;
 }
 
 .menu-title{
-padding:20px 25px 8px;
+padding:20px 25px 10px;
 font-size:13px;
 opacity:.7;
 }
@@ -52,6 +51,7 @@ display:block;
 padding:15px 25px;
 color:white;
 text-decoration:none;
+transition:.3s;
 }
 
 .sidebar a:hover,
@@ -59,8 +59,6 @@ text-decoration:none;
 background:#8FB3E2;
 color:#16246D;
 }
-
-/* Main */
 
 .main{
 margin-left:250px;
@@ -75,6 +73,10 @@ align-items:center;
 margin-bottom:30px;
 }
 
+.header h1{
+color:#16246D;
+}
+
 .admin{
 background:white;
 padding:10px 20px;
@@ -82,18 +84,19 @@ border-radius:30px;
 box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
-.form-box{
+.container{
 background:white;
-padding:30px;
+padding:25px;
 border-radius:20px;
 box-shadow:0 5px 15px rgba(0,0,0,.08);
+margin-bottom:20px;
 }
 
-.row{
+.top{
 display:grid;
-grid-template-columns:1fr 1fr;
+grid-template-columns:1fr 1fr 1fr auto;
 gap:20px;
-margin-bottom:20px;
+align-items:end;
 }
 
 .group{
@@ -108,64 +111,68 @@ color:#16246D;
 }
 
 .group input,
-.group select,
-.group textarea{
-
+.group select{
 padding:12px;
 border:1px solid #ccc;
 border-radius:10px;
 outline:none;
-font-size:15px;
-
 }
 
-.group textarea{
-resize:none;
-height:100px;
-}
-
-.buttons{
-
-display:flex;
-justify-content:flex-end;
-gap:15px;
-margin-top:25px;
-
-}
-
-.cancel{
-
-background:#ccc;
-padding:12px 25px;
-border:none;
-border-radius:10px;
+.export{
+color:#16246D;
+font-weight:bold;
 cursor:pointer;
-
+text-decoration:underline;
 }
 
-.save{
+.table-container{
+overflow-x:auto;
+}
 
+table{
+width:100%;
+border-collapse:collapse;
+}
+
+th{
+background:#eef4ff;
+color:#16246D;
+padding:14px;
+text-align:left;
+}
+
+td{
+padding:14px;
+border-bottom:1px solid #eee;
+}
+
+.view{
 background:#16246D;
 color:white;
-padding:12px 25px;
 border:none;
-border-radius:10px;
+padding:8px 15px;
+border-radius:8px;
 cursor:pointer;
-
 }
 
-.save:hover{
-background:#2743b8;
+.view:hover{
+background:#2b45b5;
 }
 
-.cancel:hover{
-background:#b3b3b3;
+.details{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
 }
 
-.note{
-margin-top:20px;
-color:#777;
-font-size:14px;
+.info p{
+margin:10px 0;
+}
+
+.product-box{
+background:#eef4ff;
+padding:20px;
+border-radius:12px;
 }
 
 </style>
@@ -176,13 +183,17 @@ font-size:14px;
 
 <div class="sidebar">
 
-<div class="logo">ValueMeds</div>
+<div class="logo">
+ValueMeds
+</div>
 
 <a href="dashboard.php">
 <i class="fas fa-home"></i> Dashboard
 </a>
 
-<div class="menu-title">INVENTORY</div>
+<div class="menu-title">
+INVENTORY
+</div>
 
 <a href="products.php">
 <i class="fas fa-pills"></i> Products
@@ -200,7 +211,9 @@ font-size:14px;
 <i class="fas fa-triangle-exclamation"></i> Stock Alerts
 </a>
 
-<div class="menu-title">SALES</div>
+<div class="menu-title">
+SALES
+</div>
 
 <a href="pos.php">
 <i class="fas fa-cash-register"></i> Point of Sales
@@ -215,3 +228,222 @@ font-size:14px;
 </a>
 
 </div>
+
+<div class="main">
+
+<div class="header">
+
+<h1>Sales History</h1>
+
+<div class="admin">
+<i class="fas fa-user"></i>
+Admin
+</div>
+
+</div>
+
+<div class="container">
+
+<div class="top">
+
+<div class="group">
+
+<label>Date From</label>
+
+<input type="date">
+
+</div>
+
+<div class="group">
+
+<label>Date To</label>
+
+<input type="date">
+
+</div>
+
+<div class="group">
+
+<label>Payment Method</label>
+
+<select>
+
+<option>All</option>
+<option>Cash</option>
+<option>GCash</option>
+<option>Card</option>
+
+</select>
+
+</div>
+
+<div>
+
+<a class="export">
+Export Report
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="container">
+
+<div class="table-container">
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Invoice No.</th>
+<th>Date & Time</th>
+<th>Cashier</th>
+<th>Total Items</th>
+<th>Total Amount</th>
+<th>Payment Method</th>
+<th>Status</th>
+<th>Action</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td>INV-2026-0001</td>
+
+<td>May 16, 2026 10:30 AM</td>
+
+<td>Admin</td>
+
+<td>3</td>
+
+<td>₱250.00</td>
+
+<td>Cash</td>
+
+<td>Completed</td>
+
+<td>
+<button class="view">
+View
+</button>
+</td>
+
+</tr>
+
+<tr>
+
+<td>INV-2026-0002</td>
+
+<td>May 16, 2026 11:15 AM</td>
+
+<td>Admin</td>
+
+<td>2</td>
+
+<td>₱180.00</td>
+
+<td>GCash</td>
+
+<td>Completed</td>
+
+<td>
+<button class="view">
+View
+</button>
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<div class="container">
+
+<h3 style="color:#16246D;margin-bottom:20px;">
+Sale Details
+</h3>
+
+<div class="details">
+
+<div class="info">
+
+<p>
+<b>Invoice No.:</b> INV-2026-0001
+</p>
+
+<p>
+<b>Date & Time:</b> May 16, 2026 | 10:30 AM
+</p>
+
+<p>
+<b>Cashier:</b> Admin
+</p>
+
+<p>
+<b>Payment Method:</b> Cash
+</p>
+
+<p>
+<b>Total Items:</b> 3
+</p>
+
+<p>
+<b>Total Quantity:</b> 6
+</p>
+
+</div>
+
+<div class="product-box">
+
+<b>Product Details</b>
+
+<br><br>
+
+<table>
+
+<tr>
+<th>Product</th>
+<th>Price</th>
+<th>Qty</th>
+<th>Subtotal</th>
+</tr>
+
+<tr>
+<td>Paracetamol</td>
+<td>₱5.00</td>
+<td>2</td>
+<td>₱10.00</td>
+</tr>
+
+<tr>
+<td>Vitamin C</td>
+<td>₱10.00</td>
+<td>4</td>
+<td>₱40.00</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
