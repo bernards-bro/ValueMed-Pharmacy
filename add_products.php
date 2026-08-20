@@ -1,3 +1,33 @@
+<?php
+
+require 'db.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    $product_name = $_POST ["product_name"];
+    $product_code = $_POST ["product_code"];
+    $category = $_POST ["category"];
+    $price = $_POST ["price"];
+    $stock = $_POST ["stock"];
+    $expiry_date = $_POST ["expiry_date"];
+
+        $sql = "INSERT INTO products (
+        product_name, product_code, category, price, stock, expiry_date)
+        VALUES (
+        '$product_name', '$product_code', '$category', '$price', '$stock', '$expiry_date')";
+
+    if ($conn->query($sql) === TRUE){
+
+       header("Location: products.php");
+       exit();
+
+    } else {
+        echo "Error: " . $conn->error;
+    }
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -249,13 +279,26 @@ required>
 </div>
 
 <div class="group">
+    <label>Product Code </label>
+
+<input type="text"
+name="product_name"
+placeholder="Enter product name"
+required>
+
+</div>
+
+</div>
+
+<div class="row">
+
+<div class="group">
 
 <label>Category</label>
 
 <select name="category" required>
 
 <option value="">Select Category</option>
-
 <option>Tablet</option>
 <option>Capsule</option>
 <option>Syrup</option>
@@ -270,12 +313,15 @@ required>
 
 <div class="group">
 
-<label>Description</label>
+<label>Price</label>
 
-<textarea
-name="description"
-placeholder="Enter description"></textarea>
+<input type="number"
+step="0.01"
+name="price"
+placeholder="Enter price"
+required>
 
+</div>
 </div>
 
 <br>
@@ -284,43 +330,13 @@ placeholder="Enter description"></textarea>
 
 <div class="group">
 
-<label>Cost Price</label>
+<label>Stock</label>
 
 <input
 type="number"
-step="0.01"
-name="cost_price"
+name="stock"
+placeholder="Enter Stock Quantity"
 required>
-
-</div>
-
-<div class="group">
-
-<label>Selling Price</label>
-
-<input
-type="number"
-step="0.01"
-name="selling_price"
-required>
-
-</div>
-
-</div>
-
-<div class="row">
-
-<div class="group">
-
-<label>Stock Status</label>
-
-<select name="stock_status">
-
-<option>In Stock</option>
-<option>Low Stock</option>
-<option>Out of Stock</option>
-
-</select>
 
 </div>
 
@@ -336,6 +352,7 @@ required>
 </div>
 
 </div>
+
 
 <p class="note">
 QR Code will be generated automatically after saving.

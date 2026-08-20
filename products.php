@@ -1,14 +1,9 @@
 <?php
 
-$products = [
+require 'db.php';
 
-["P001","Paracetamol","Tablet",5.50,250,"2027-05-20"],
-["P002","Biogesic","Tablet",6.00,180,"2027-08-10"],
-["P003","Amoxicillin","Capsule",12.50,80,"2026-11-15"],
-["P004","Vitamin C","Tablet",7.50,120,"2027-02-18"],
-["P005","Cetirizine","Tablet",8.25,60,"2026-10-01"]
-
-];
+$sql = "SELECT * FROM products";
+$result = $conn->query($sql);
 
 ?>
 
@@ -235,10 +230,10 @@ type="text"
 class="search"
 placeholder="Search products...">
 
-<button class="add-btn">
+<a href="add_products.php" class="add-btn">
 <i class="fas fa-plus"></i>
 ADD PRODUCT
-</button>
+</a>
 
 </div>
 
@@ -248,6 +243,7 @@ ADD PRODUCT
 
 <th>ID</th>
 <th>Name</th>
+<th>Code</th>
 <th>Category</th>
 <th>Price</th>
 <th>Stock</th>
@@ -258,31 +254,33 @@ ADD PRODUCT
 
 <?php
 
-foreach($products as $p){
+foreach($result as $p){
 
-echo "
+?>
 
 <tr>
 
-<td>$p[0]</td>
+<td><?= $p['product_id'];?></td>
 
-<td>$p[1]</td>
+<td><?= $p['product_name']; ?></td>
 
-<td>$p[2]</td>
+<td><?= $p['product_code']; ?></td>
 
-<td>₱".number_format($p[3],2)."</td>
+<td><?= $p['category']; ?></td>
 
-<td>$p[4]</td>
+<td><?= number_format($p['price'],2); ?></td>
 
-<td>$p[5]</td>
+<td><?= $p['stock']; ?></td>
+
+<td><?= $p['expiry_date']; ?></td>
 
 <td>
 
-<a href='#' class='edit'>
+<a href='edit.php' class='edit'>
 <i class='fas fa-edit'></i>
 </a>
 
-<a href='#' class='delete'>
+<a href='delete.php' class='delete'>
 <i class='fas fa-trash'></i>
 </a>
 
@@ -290,9 +288,7 @@ echo "
 
 </tr>
 
-";
-
-}
+<?php }
 
 ?>
 
