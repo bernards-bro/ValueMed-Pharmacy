@@ -282,8 +282,8 @@ required>
     <label>Product Code </label>
 
 <input type="text"
-name="product_name"
-placeholder="Enter product name"
+name="product_code"
+placeholder="Enter product code"
 required>
 
 </div>

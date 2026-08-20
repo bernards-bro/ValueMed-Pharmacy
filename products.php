@@ -276,11 +276,11 @@ foreach($result as $p){
 
 <td>
 
-<a href='edit.php' class='edit'>
+<a href="edit.php?id=<?= $p['product_id']; ?>" class="edit">
 <i class='fas fa-edit'></i>
 </a>
 
-<a href='delete.php' class='delete'>
+<a href="delete.php?id=<?= $p['product_id']; ?>" class="delete">
 <i class='fas fa-trash'></i>
 </a>
 
