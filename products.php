@@ -2,7 +2,7 @@
 
 require 'db.php';
 
-$sql = "SELECT * FROM products";
+$sql = "SELECT * FROM medicines";
 $result = $conn->query($sql);
 
 ?>
@@ -183,10 +183,6 @@ ValueMeds
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="add_products.php">
-<i class="fas fa-plus-circle"></i> Add Products
-</a>
-
 <a href="stock_in.php">
 <i class="fas fa-box-open"></i> Stock In
 </a>
@@ -243,7 +239,7 @@ ADD PRODUCT
 
 <th>ID</th>
 <th>Name</th>
-<th>Code</th>
+<th>Description</th>
 <th>Category</th>
 <th>Price</th>
 <th>Stock</th>
@@ -260,27 +256,27 @@ foreach($result as $p){
 
 <tr>
 
-<td><?= $p['product_id'];?></td>
+<td><?= $p['medicine_id'];?></td>
 
-<td><?= $p['product_name']; ?></td>
+<td><?= $p['medicine_name']; ?></td>
 
-<td><?= $p['product_code']; ?></td>
+<td><?= $p['description']; ?></td>
 
 <td><?= $p['category']; ?></td>
 
-<td><?= number_format($p['price'],2); ?></td>
+<td><?= number_format($p['selling_price'],2); ?></td>
 
-<td><?= $p['stock']; ?></td>
+<td><?= $p['stock_quantity']; ?></td>
 
-<td><?= $p['expiry_date']; ?></td>
+<td><?= $p['expiration_date']; ?></td>
 
 <td>
 
-<a href="edit.php?id=<?= $p['product_id']; ?>" class="edit">
+<a href="edit.php?id=<?= $p['medicine_id']; ?>" class="edit">
 <i class='fas fa-edit'></i>
 </a>
 
-<a href="delete.php?id=<?= $p['product_id']; ?>" class="delete">
+<a href="delete.php?id=<?= $p['medicine_id']; ?>" class="delete">
 <i class='fas fa-trash'></i>
 </a>
 

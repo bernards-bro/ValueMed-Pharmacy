@@ -4,17 +4,17 @@ require 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
-    $product_name = $_POST ["product_name"];
-    $product_code = $_POST ["product_code"];
+    $medicine_name = $_POST ["medicine_name"];
+    $description = $_POST ["description"];
     $category = $_POST ["category"];
-    $price = $_POST ["price"];
-    $stock = $_POST ["stock"];
-    $expiry_date = $_POST ["expiry_date"];
+    $selling_price = $_POST ["selling_price"];
+    $stock_quantity = $_POST ["stock_quantity"];
+    $expiration_date = $_POST ["expiration_date"];
 
-        $sql = "INSERT INTO products (
-        product_name, product_code, category, price, stock, expiry_date)
+        $sql = "INSERT INTO medicines (
+        medicine_name, description, category, selling_price, stock_quantity, expiration_date)
         VALUES (
-        '$product_name', '$product_code', '$category', '$price', '$stock', '$expiry_date')";
+        '$medicine_name', '$description', '$category', '$selling_price', '$stock_quantity', '$expiration_date')";
 
     if ($conn->query($sql) === TRUE){
 
@@ -218,10 +218,6 @@ font-size:14px;
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="add_products.php" class="active">
-<i class="fas fa-plus-circle"></i> Add Products
-</a>
-
 <a href="stock_in.php">
 <i class="fas fa-box-open"></i> Stock In
 </a>
@@ -268,22 +264,22 @@ font-size:14px;
 
 <div class="group">
 
-<label>Product Name</label>
+<label>Medicine Name</label>
 
 <input
 type="text"
-name="product_name"
-placeholder="Enter product name"
+name="medicine_name"
+placeholder="Enter medicine name"
 required>
 
 </div>
 
 <div class="group">
-    <label>Product Code </label>
+    <label>Medicine Description </label>
 
 <input type="text"
-name="product_code"
-placeholder="Enter product code"
+name="description"
+placeholder="Enter Description"
 required>
 
 </div>
@@ -313,11 +309,11 @@ required>
 
 <div class="group">
 
-<label>Price</label>
+<label>Selling Price</label>
 
 <input type="number"
 step="0.01"
-name="price"
+name="selling_price"
 placeholder="Enter price"
 required>
 
@@ -330,11 +326,11 @@ required>
 
 <div class="group">
 
-<label>Stock</label>
+<label>Stock Quantity</label>
 
 <input
 type="number"
-name="stock"
+name="stock_quantity"
 placeholder="Enter Stock Quantity"
 required>
 
@@ -346,7 +342,7 @@ required>
 
 <input
 type="date"
-name="expiry_date"
+name="expiration_date"
 required>
 
 </div>

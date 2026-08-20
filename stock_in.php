@@ -226,10 +226,6 @@ INVENTORY
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="add_products.php">
-<i class="fas fa-plus-circle"></i> Add Products
-</a>
-
 <a href="stock_in.php" class="active">
 <i class="fas fa-box-open"></i> Stock In
 </a>

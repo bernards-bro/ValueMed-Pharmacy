@@ -5,11 +5,11 @@ require 'db.php';
 /* Get product ID */
 if (isset($_GET['id'])) {
 
-    $product_id = $_GET['id'];
+    $medicine_id = $_GET['id'];
 
-} elseif (isset($_POST['product_id'])) {
+} elseif (isset($_POST['medicine_id'])) {
 
-    $product_id = $_POST['product_id'];
+    $medicine_id = $_POST['medicine_id'];
 
 } else {
 
@@ -22,33 +22,33 @@ if (isset($_GET['id'])) {
 /* Update product */
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $product_name = $_POST["product_name"];
-    $product_code = $_POST["product_code"];
+    $product_name = $_POST["medicine_name"];
+    $description = $_POST["description"];
     $category = $_POST["category"];
-    $price = $_POST["price"];
-    $stock = $_POST["stock"];
-    $expiry_date = $_POST["expiry_date"];
+    $price = $_POST["selling_price"];
+    $stock = $_POST["stock_quantity"];
+    $expiry_date = $_POST["expiration_date"];
 
     $stmt = $conn->prepare("
-        UPDATE products SET
-            product_name = ?,
-            product_code = ?,
+        UPDATE medicines SET
+            medicine_name = ?,
+            description = ?,
             category = ?,
-            price = ?,
-            stock = ?,
+            selling_price = ?,
+            stock_quantity = ?,
             expiry_date = ?
         WHERE product_id = ?
     ");
 
     $stmt->bind_param(
         "sssdiss",
-        $product_name,
-        $product_code,
+        $medicine_name,
+        $description,
         $category,
-        $price,
-        $stock,
-        $expiry_date,
-        $product_id
+        $selling_price,
+        $stock_quantity,
+        $expiration_date,
+        $medicine_id
     );
 
     if ($stmt->execute()) {
@@ -71,11 +71,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 /* Get existing product */
 $stmt = $conn->prepare("
     SELECT *
-    FROM products
-    WHERE product_id = ?
+    FROM medicines
+    WHERE medicine_id = ?
 ");
 
-$stmt->bind_param("i", $product_id);
+$stmt->bind_param("i", $medicine_id);
 $stmt->execute();
 
 $result = $stmt->get_result();
@@ -87,7 +87,7 @@ if ($result->num_rows == 0) {
 
 }
 
-$product = $result->fetch_assoc();
+$medicines = $result->fetch_assoc();
 
 ?>
 
@@ -319,8 +319,8 @@ body{
 
             <input
                 type="hidden"
-                name="product_id"
-                value="<?= htmlspecialchars($product['product_id']); ?>"
+                name="medicine_id"
+                value="<?= htmlspecialchars($medicines['medicine_id']); ?>"
             >
 
 
@@ -332,8 +332,8 @@ body{
 
                     <input
                         type="text"
-                        name="product_name"
-                        value="<?= htmlspecialchars($product['product_name']); ?>"
+                        name="medicine_name"
+                        value="<?= htmlspecialchars($medicines['medicine_name']); ?>"
                         required
                     >
 
@@ -342,12 +342,12 @@ body{
 
                 <div class="group">
 
-                    <label>Product Code</label>
+                    <label>Product Description</label>
 
                     <input
                         type="text"
-                        name="product_code"
-                        value="<?= htmlspecialchars($product['product_code']); ?>"
+                        name="description"
+                        value="<?= htmlspecialchars($medicines['description']); ?>"
                         required
                     >
 
@@ -367,27 +367,27 @@ body{
                         <option value="">Select Category</option>
 
                         <option value="Tablet"
-                            <?= $product['category'] == 'Tablet' ? 'selected' : ''; ?>>
+                            <?= $medicines['category'] == 'Tablet' ? 'selected' : ''; ?>>
                             Tablet
                         </option>
 
                         <option value="Capsule"
-                            <?= $product['category'] == 'Capsule' ? 'selected' : ''; ?>>
+                            <?= $medicines['category'] == 'Capsule' ? 'selected' : ''; ?>>
                             Capsule
                         </option>
 
                         <option value="Syrup"
-                            <?= $product['category'] == 'Syrup' ? 'selected' : ''; ?>>
+                            <?= $medicines['category'] == 'Syrup' ? 'selected' : ''; ?>>
                             Syrup
                         </option>
 
                         <option value="Injection"
-                            <?= $product['category'] == 'Injection' ? 'selected' : ''; ?>>
+                            <?= $medicines['category'] == 'Injection' ? 'selected' : ''; ?>>
                             Injection
                         </option>
 
                         <option value="Vitamin"
-                            <?= $product['category'] == 'Vitamin' ? 'selected' : ''; ?>>
+                            <?= $medicines['category'] == 'Vitamin' ? 'selected' : ''; ?>>
                             Vitamin
                         </option>
 
@@ -403,8 +403,8 @@ body{
                     <input
                         type="number"
                         step="0.01"
-                        name="price"
-                        value="<?= htmlspecialchars($product['price']); ?>"
+                        name="selling_price"
+                        value="<?= htmlspecialchars($medicines['selling_price']); ?>"
                         required
                     >
 
@@ -421,8 +421,8 @@ body{
 
                     <input
                         type="number"
-                        name="stock"
-                        value="<?= htmlspecialchars($product['stock']); ?>"
+                        name="stock_quantity"
+                        value="<?= htmlspecialchars($medicines['stock_quantity']); ?>"
                         required
                     >
 
@@ -435,8 +435,8 @@ body{
 
                     <input
                         type="date"
-                        name="expiry_date"
-                        value="<?= htmlspecialchars($product['expiry_date']); ?>"
+                        name="expiration_date"
+                        value="<?= htmlspecialchars($medicines['expiration_date']); ?>"
                         required
                     >
 
