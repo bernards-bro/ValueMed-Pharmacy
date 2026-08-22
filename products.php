@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+=======
+<?php
+
+require 'db.php';
+
+$sql = "SELECT * FROM medicines";
+$result = $conn->query($sql);
+
+?>
+
+>>>>>>> 74d98675e6971956b3e8c17de842d5fdc39e27d7
 <!DOCTYPE html>
 <html lang="en">
 
@@ -226,11 +238,15 @@ INVENTORY
 <i class="fas fa-pills"></i> Products
 </a>
 
+<<<<<<< HEAD
 <a href="add_products.php">
 <i class="fas fa-plus-circle"></i> Add Products
 </a>
 
 <a href="stock_in.php" class="active">
+=======
+<a href="stock_in.php">
+>>>>>>> 74d98675e6971956b3e8c17de842d5fdc39e27d7
 <i class="fas fa-box-open"></i> Stock In
 </a>
 
@@ -407,11 +423,77 @@ Cancel
 
 Confirm
 
+<<<<<<< HEAD
 </button>
 
 </div>
 
 </div>
+=======
+<a href="add_products.php" class="add-btn">
+<i class="fas fa-plus"></i>
+ADD PRODUCT
+</a>
+
+</div>
+
+<table>
+
+<tr>
+
+<th>ID</th>
+<th>Name</th>
+<th>Description</th>
+<th>Category</th>
+<th>Price</th>
+<th>Stock</th>
+<th>Expiry Date</th>
+<th>Actions</th>
+
+</tr>
+
+<?php
+
+foreach($result as $p){
+
+?>
+
+<tr>
+
+<td><?= $p['medicine_id'];?></td>
+
+<td><?= $p['medicine_name']; ?></td>
+
+<td><?= $p['description']; ?></td>
+
+<td><?= $p['category']; ?></td>
+
+<td><?= number_format($p['selling_price'],2); ?></td>
+
+<td><?= $p['stock_quantity']; ?></td>
+
+<td><?= $p['expiration_date']; ?></td>
+
+<td>
+
+<a href="edit.php?id=<?= $p['medicine_id']; ?>" class="edit">
+<i class='fas fa-edit'></i>
+</a>
+
+<a href="delete.php?id=<?= $p['medicine_id']; ?>" class="delete">
+<i class='fas fa-trash'></i>
+</a>
+
+</td>
+
+</tr>
+
+<?php }
+
+?>
+
+</table>
+>>>>>>> 74d98675e6971956b3e8c17de842d5fdc39e27d7
 
 </div>
 

@@ -303,11 +303,6 @@ INVENTORY
 Products
 </a>
 
-<a href="add_products.php">
-<i class="fas fa-plus-circle"></i>
-Add Products
-</a>
-
 <a href="stock_in.php">
 <i class="fas fa-box-open"></i>
 Stock In

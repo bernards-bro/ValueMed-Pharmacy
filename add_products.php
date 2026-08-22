@@ -1,6 +1,36 @@
 <?php
+<<<<<<< HEAD
 require 'connection.php';
 session_start();
+=======
+
+require 'db.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    $medicine_name = $_POST ["medicine_name"];
+    $description = $_POST ["description"];
+    $category = $_POST ["category"];
+    $selling_price = $_POST ["selling_price"];
+    $stock_quantity = $_POST ["stock_quantity"];
+    $expiration_date = $_POST ["expiration_date"];
+
+        $sql = "INSERT INTO medicines (
+        medicine_name, description, category, selling_price, stock_quantity, expiration_date)
+        VALUES (
+        '$medicine_name', '$description', '$category', '$selling_price', '$stock_quantity', '$expiration_date')";
+
+    if ($conn->query($sql) === TRUE){
+
+       header("Location: products.php");
+       exit();
+
+    } else {
+        echo "Error: " . $conn->error;
+    }
+}
+
+>>>>>>> 74d98675e6971956b3e8c17de842d5fdc39e27d7
 ?>
 
 <!DOCTYPE html>
@@ -193,10 +223,6 @@ font-size:14px;
 <i class="fas fa-pills"></i> Products
 </a>
 
-<a href="add_products.php" class="active">
-<i class="fas fa-plus-circle"></i> Add Products
-</a>
-
 <a href="stock_in.php">
 <i class="fas fa-box-open"></i> Stock In
 </a>
@@ -243,15 +269,29 @@ font-size:14px;
 
 <div class="group">
 
-<label>Product Name</label>
+<label>Medicine Name</label>
 
 <input
 type="text"
-name="product_name"
-placeholder="Enter product name"
+name="medicine_name"
+placeholder="Enter medicine name"
 required>
 
 </div>
+
+<div class="group">
+    <label>Medicine Description </label>
+
+<input type="text"
+name="description"
+placeholder="Enter Description"
+required>
+
+</div>
+
+</div>
+
+<div class="row">
 
 <div class="group">
 
@@ -260,7 +300,6 @@ required>
 <select name="category" required>
 
 <option value="">Select Category</option>
-
 <option>Tablet</option>
 <option>Capsule</option>
 <option>Syrup</option>
@@ -275,12 +314,15 @@ required>
 
 <div class="group">
 
-<label>Description</label>
+<label>Selling Price</label>
 
-<textarea
-name="description"
-placeholder="Enter description"></textarea>
+<input type="number"
+step="0.01"
+name="selling_price"
+placeholder="Enter price"
+required>
 
+</div>
 </div>
 
 <br>
@@ -289,43 +331,13 @@ placeholder="Enter description"></textarea>
 
 <div class="group">
 
-<label>Cost Price</label>
+<label>Stock Quantity</label>
 
 <input
 type="number"
-step="0.01"
-name="cost_price"
+name="stock_quantity"
+placeholder="Enter Stock Quantity"
 required>
-
-</div>
-
-<div class="group">
-
-<label>Selling Price</label>
-
-<input
-type="number"
-step="0.01"
-name="selling_price"
-required>
-
-</div>
-
-</div>
-
-<div class="row">
-
-<div class="group">
-
-<label>Stock Status</label>
-
-<select name="stock_status">
-
-<option>In Stock</option>
-<option>Low Stock</option>
-<option>Out of Stock</option>
-
-</select>
 
 </div>
 
@@ -335,12 +347,13 @@ required>
 
 <input
 type="date"
-name="expiry_date"
+name="expiration_date"
 required>
 
 </div>
 
 </div>
+
 
 <p class="note">
 QR Code will be generated automatically after saving.
