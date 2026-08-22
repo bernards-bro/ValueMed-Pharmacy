@@ -1,11 +1,78 @@
 <?php
-session_start();
+require 'connection.php';
 
-// Sample Data palang hahah 
-$totalProfit = 12000;
-$totalProducts = 300;
-$stockAlert = 28;
-$todaysSale = 65;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+/* =========================
+   DASHBOARD DATA
+========================= */
+
+/* Total Products */
+$result = $conn->query("
+    SELECT COUNT(*) AS total
+    FROM meds
+");
+
+$row = $result->fetch_assoc();
+$totalProducts = $row['total'];
+
+
+/* Stock Alerts */
+$result = $conn->query("
+    SELECT COUNT(*) AS total
+    FROM meds
+    WHERE StockStatus = 'Low Stock'
+");
+
+$row = $result->fetch_assoc();
+$stockAlert = $row['total'];
+
+
+/* Today's Sales */
+$result = $conn->query("
+    SELECT COALESCE(SUM(TotalAmount), 0) AS total
+    FROM sales
+    WHERE DATE(SaleDate) = CURDATE()
+");
+
+$row = $result->fetch_assoc();
+$todaysSale = $row['total'];
+
+
+/* Total Profit */
+$result = $conn->query("
+    SELECT COALESCE(
+        SUM(
+            (m.CostPrice * si.Quantity * -1)
+            + si.Subtotal
+        ), 0
+    ) AS profit
+    FROM sale_items si
+    INNER JOIN meds m
+        ON si.ProductID = m.ID
+");
+
+$row = $result->fetch_assoc();
+$totalProfit = $row['profit'];
+
+
+/* Recent Transactions */
+$recentTransactions = $conn->query("
+    SELECT
+        m.ProductName,
+        si.Quantity,
+        si.Subtotal,
+        s.SaleDate
+    FROM sale_items si
+    INNER JOIN meds m
+        ON si.ProductID = m.ID
+    INNER JOIN sales s
+        ON si.SaleID = s.SaleID
+    ORDER BY s.SaleDate DESC
+    LIMIT 5
+");
 ?>
 
 <!DOCTYPE html>

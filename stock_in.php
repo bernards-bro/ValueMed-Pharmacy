@@ -1,3 +1,142 @@
+<?php
+
+require 'connection.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$message = "";
+$error = "";
+
+/* =========================
+   HANDLE STOCK IN
+========================= */
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    $productID = intval($_POST['productID']);
+    $quantity = intval($_POST['quantity']);
+    $stockInDate = $_POST['stockInDate'];
+    $remarks = trim($_POST['remarks']);
+    $userID = $_SESSION['id'] ?? 0;
+
+    if ($productID <= 0) {
+        $error = "Please select a product.";
+    } elseif ($quantity <= 0) {
+        $error = "Quantity must be greater than 0.";
+    } elseif (empty($stockInDate)) {
+        $error = "Please select a stock-in date.";
+    } elseif ($userID <= 0) {
+        $error = "You must be logged in.";
+    } else {
+
+        try {
+
+            $conn->begin_transaction();
+
+            /* Get current product */
+            $stmt = $conn->prepare("
+                SELECT StockQuantity
+                FROM meds
+                WHERE ID = ?
+                FOR UPDATE
+            ");
+
+            $stmt->bind_param("i", $productID);
+            $stmt->execute();
+
+            $result = $stmt->get_result();
+
+            if ($result->num_rows !== 1) {
+                throw new Exception("Product not found.");
+            }
+
+            $product = $result->fetch_assoc();
+
+            $currentStock = intval($product['StockQuantity']);
+            $newStock = $currentStock + $quantity;
+
+
+            /* Update stock */
+            $stmt = $conn->prepare("
+                UPDATE meds
+                SET
+                    StockQuantity = ?,
+                    StockStatus = CASE
+                        WHEN ? <= 0 THEN 'Out of Stock'
+                        WHEN ? <= 10 THEN 'Low Stock'
+                        ELSE 'In Stock'
+                    END
+                WHERE ID = ?
+            ");
+
+            $stmt->bind_param(
+                "iiii",
+                $newStock,
+                $newStock,
+                $newStock,
+                $productID
+            );
+
+            $stmt->execute();
+
+
+            /* Record stock-in history */
+            $stmt = $conn->prepare("
+                INSERT INTO stock_in
+                (
+                    ProductID,
+                    QuantityReceived,
+                    StockInDate,
+                    Remarks,
+                    UserID
+                )
+                VALUES (?, ?, ?, ?, ?)
+            ");
+
+            $stmt->bind_param(
+                "iissi",
+                $productID,
+                $quantity,
+                $stockInDate,
+                $remarks,
+                $userID
+            );
+
+            $stmt->execute();
+
+            $conn->commit();
+
+            $message = "Stock successfully added. New stock: " . $newStock;
+
+        } catch (Exception $e) {
+
+            $conn->rollback();
+
+            $error = "Stock-in failed: " . $e->getMessage();
+        }
+    }
+}
+
+
+/* =========================
+   GET PRODUCTS
+========================= */
+
+$products = $conn->query("
+    SELECT
+        ID,
+        ProductName,
+        Catagory,
+        StockQuantity,
+        ExpirationDate
+    FROM meds
+    ORDER BY ProductName ASC
+");
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
