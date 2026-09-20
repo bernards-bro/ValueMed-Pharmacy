@@ -8,69 +8,81 @@ if (session_status() === PHP_SESSION_NONE) {
 /* =========================
    DASHBOARD DATA
 ========================= */
-
-/* Total Products */
+/* =========================
+   TOTAL PRODUCTS
+   Count all medicines
+========================= */
 $result = $conn->query("
     SELECT COUNT(*) AS total
-    FROM meds
+    FROM medicines
 ");
 
 $row = $result->fetch_assoc();
 $totalProducts = $row['total'];
 
 
-/* Stock Alerts */
+/* =========================
+   STOCK ALERTS
+   0 = Out of Stock
+   1-20 = Low Stock
+========================= */
 $result = $conn->query("
     SELECT COUNT(*) AS total
-    FROM meds
-    WHERE StockStatus = 'Low Stock'
+    FROM medicines
+    WHERE stock <= 20
 ");
 
 $row = $result->fetch_assoc();
 $stockAlert = $row['total'];
 
 
-/* Today's Sales */
+/* =========================
+   TODAY'S SALES
+========================= */
 $result = $conn->query("
-    SELECT COALESCE(SUM(TotalAmount), 0) AS total
+    SELECT COALESCE(SUM(total_amount), 0) AS total
     FROM sales
-    WHERE DATE(SaleDate) = CURDATE()
+    WHERE DATE(sale_date) = CURDATE()
 ");
 
 $row = $result->fetch_assoc();
 $todaysSale = $row['total'];
 
 
-/* Total Profit */
+/* =========================
+   TOTAL PROFIT
+   Selling Price - Cost Price
+========================= */
 $result = $conn->query("
     SELECT COALESCE(
         SUM(
-            (m.CostPrice * si.Quantity * -1)
-            + si.Subtotal
-        ), 0
+            (m.price - m.cost_price) * si.quantity
+        ),
+        0
     ) AS profit
     FROM sale_items si
-    INNER JOIN meds m
-        ON si.ProductID = m.ID
+    INNER JOIN medicines m
+        ON si.medicine_id = m.medicine_id
 ");
 
 $row = $result->fetch_assoc();
 $totalProfit = $row['profit'];
 
-
-/* Recent Transactions */
+/* =========================
+   RECENT TRANSACTIONS
+========================= */
 $recentTransactions = $conn->query("
     SELECT
-        m.ProductName,
-        si.Quantity,
-        si.Subtotal,
-        s.SaleDate
+        m.name,
+        si.quantity,
+        si.subtotal,
+        s.sale_date
     FROM sale_items si
-    INNER JOIN meds m
-        ON si.ProductID = m.ID
+    INNER JOIN medicines m
+        ON si.medicine_id = m.medicine_id
     INNER JOIN sales s
-        ON si.SaleID = s.SaleID
-    ORDER BY s.SaleDate DESC
+        ON si.sale_id = s.sale_id
+    ORDER BY s.sale_date DESC
     LIMIT 5
 ");
 ?>
@@ -102,50 +114,52 @@ background:#F5F7FC;
 display:flex;
 }
 
-/* Sidebar */
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar{
-width:250px;
-height:100vh;
-background:#16246D;
-color:white;
-position:fixed;
-left:0;
-top:0;
-overflow:auto;
+    width:250px;
+    height:100vh;
+    background:#16246D;
+    color:white;
+    position:fixed;
+    left:0;
+    top:0;
+    overflow:auto;
 }
 
 .logo{
-padding:25px;
-font-size:25px;
-font-weight:bold;
-text-align:center;
-border-bottom:1px solid rgba(255,255,255,.15);
+    padding:25px;
+    font-size:25px;
+    font-weight:bold;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.15);
 }
 
 .menu-title{
-padding:20px 25px 10px;
-font-size:13px;
-opacity:.7;
-letter-spacing:1px;
+    padding:20px 25px 10px;
+    font-size:13px;
+    opacity:.7;
+    letter-spacing:1px;
 }
 
 .sidebar a{
-display:block;
-padding:14px 25px;
-color:white;
-text-decoration:none;
-transition:.3s;
+    display:block;
+    padding:14px 25px;
+    color:white;
+    text-decoration:none;
+    transition:.3s;
 }
 
 .sidebar a i{
-width:25px;
+    width:25px;
 }
 
 .sidebar a:hover,
 .sidebar .active{
-background:#8FB3E2;
-color:#16246D;
+    background:#8FB3E2;
+    color:#16246D;
 }
 
 /* Main */
@@ -281,57 +295,56 @@ color:green;
 
 <body>
 
-<!-- Sidebar -->
-
+<!-- =========================
+     SIDEBAR
+========================= -->
 <div class="sidebar">
+    <div class="logo">
+        ValueMeds
+    </div>
 
-<div class="logo">
-ValueMeds
-</div>
+    <a href="dashboard.php"  class="active">
+        <i class="fas fa-home"></i>
+        Dashboard
+    </a>
 
-<a href="dashboard.php" class="active">
-<i class="fas fa-home"></i>
-Dashboard
-</a>
+    <div class="menu-title">
+        INVENTORY
+    </div>
 
-<div class="menu-title">
-INVENTORY
-</div>
+    <a href="products.php">
+        <i class="fas fa-pills"></i>
+        Products
+    </a>
 
-<a href="products.php">
-<i class="fas fa-pills"></i>
-Products
-</a>
+    <a href="inventory.php">
+        <i class="fas fa-box-open"></i>
+        Inventory
+    </a>
 
-<a href="stock_in.php">
-<i class="fas fa-box-open"></i>
-Stock In
-</a>
-
-<a href="stock_alerts.php">
-<i class="fas fa-triangle-exclamation"></i>
-Stock Alerts
-</a>
+    <a href="stock_alerts.php">
+        <i class="fas fa-triangle-exclamation"></i>
+        Stock Alerts
+    </a>
 
 <div class="menu-title">
 SALES
 </div>
 
-<a href="#">
-<i class="fas fa-cash-register"></i>
-Point of Sales
-</a>
+    <a href="pos.php">
+        <i class="fas fa-cash-register"></i>
+        Point of Sale
+    </a>
 
-<a href="#">
-<i class="fas fa-clock-rotate-left"></i>
-Sales History
-</a>
+    <a href="sales_history.php">
+        <i class="fas fa-clock-rotate-left"></i>
+        Sales History
+    </a>
 
-<a href="#">
-<i class="fas fa-chart-column"></i>
-Reports
-</a>
-
+    <a href="reports.php">
+        <i class="fas fa-chart-column"></i>
+        Reports
+    </a>
 </div>
 
 <!-- Main -->
@@ -403,30 +416,32 @@ Chart.js will be placed here
 
 <h3>Recent Transactions</h3>
 
-<div class="transaction">
-<span>Paracetamol</span>
-<span class="price">₱120</span>
-</div>
+<?php if ($recentTransactions && $recentTransactions->num_rows > 0): ?>
 
-<div class="transaction">
-<span>Biogesic</span>
-<span class="price">₱95</span>
-</div>
+    <?php while ($transaction = $recentTransactions->fetch_assoc()): ?>
 
-<div class="transaction">
-<span>Vitamin C</span>
-<span class="price">₱250</span>
-</div>
+        <div class="transaction">
 
-<div class="transaction">
-<span>Amoxicillin</span>
-<span class="price">₱180</span>
-</div>
+            <span>
+                <?= htmlspecialchars($transaction['name']) ?>
+                ×<?= $transaction['quantity'] ?>
+            </span>
 
-<div class="transaction">
-<span>Cetirizine</span>
-<span class="price">₱140</span>
-</div>
+            <span class="price">
+                ₱<?= number_format($transaction['subtotal'], 2) ?>
+            </span>
+
+        </div>
+
+    <?php endwhile; ?>
+
+<?php else: ?>
+
+    <div class="transaction">
+        <span>No transactions yet.</span>
+    </div>
+
+<?php endif; ?>
 
 </div>
 

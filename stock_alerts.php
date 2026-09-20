@@ -1,3 +1,10 @@
+<?php
+header("Location: dashboard.php");
+exit;
+?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -177,44 +184,58 @@ text-decoration:none;
 </head>
 
 <body>
-
+<!-- =========================
+     SIDEBAR
+========================= -->
 <div class="sidebar">
+    <div class="logo">
+        ValueMeds
+    </div>
 
-<div class="logo">ValueMeds</div>
+    <a href="dashboard.php">
+        <i class="fas fa-home"></i>
+        Dashboard
+    </a>
 
-<a href="dashboard.php">
-<i class="fas fa-home"></i> Dashboard
-</a>
+    <div class="menu-title">
+        INVENTORY
+    </div>
 
-<div class="menu-title">INVENTORY</div>
+    <a href="products.php">
+        <i class="fas fa-pills"></i>
+        Products
+    </a>
 
-<a href="products.php">
-<i class="fas fa-pills"></i> Products
-</a>
+    <a href="inventory.php" class="active">
+        <i class="fas fa-box-open"></i>
+        Inventory
+    </a>
 
-<a href="stock_in.php">
-<i class="fas fa-box-open"></i> Stock In
-</a>
+    <a href="stock_alerts.php">
+        <i class="fas fa-triangle-exclamation"></i>
+        Stock Alerts
+    </a>
 
-<a href="stock_alerts.php" class="active">
-<i class="fas fa-triangle-exclamation"></i> Stock Alerts
-</a>
-
-<div class="menu-title">SALES</div>
-
-<a href="pos.php">
-<i class="fas fa-cash-register"></i> Point of Sales
-</a>
-
-<a href="sales_history.php">
-<i class="fas fa-clock"></i> Sales History
-</a>
-
-<a href="reports.php">
-<i class="fas fa-chart-column"></i> Reports
-</a>
-
+<div class="menu-title">
+SALES
 </div>
+
+    <a href="pos.php">
+        <i class="fas fa-cash-register"></i>
+        Point of Sale
+    </a>
+
+    <a href="sales_history.php">
+        <i class="fas fa-clock-rotate-left"></i>
+        Sales History
+    </a>
+
+    <a href="reports.php">
+        <i class="fas fa-chart-column"></i>
+        Reports
+    </a>
+</div>
+
 
 <div class="main">
 
