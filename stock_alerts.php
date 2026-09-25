@@ -600,12 +600,12 @@ width:calc(100% - 200px);
         Products
     </a>
 
-    <a href="inventory.php">
+    <a href="inventory.php" class="active">
         <i class="fas fa-box-open"></i>
         Inventory
     </a>
 
-    <a href="stock_alerts.php"  class="active">
+    <a href="stock_alerts.php">
         <i class="fas fa-triangle-exclamation"></i>
         Stock Alerts
     </a>
@@ -627,6 +627,14 @@ width:calc(100% - 200px);
     <a href="reports.php">
         <i class="fas fa-chart-column"></i>
         Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
     </a>
 </div>
 

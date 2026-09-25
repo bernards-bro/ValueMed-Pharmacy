@@ -814,96 +814,61 @@ display:flex;
 <!-- =========================
      SIDEBAR
 ========================= -->
-
 <div class="sidebar">
+    <div class="logo">
+        ValueMeds
+    </div>
 
+    <a href="dashboard.php">
+        <i class="fas fa-home"></i>
+        Dashboard
+    </a>
 
-<div class="logo">
+    <div class="menu-title">
+        INVENTORY
+    </div>
 
-ValueMeds
+    <a href="products.php">
+        <i class="fas fa-pills"></i>
+        Products
+    </a>
 
-</div>
+    <a href="inventory.php" class="active">
+        <i class="fas fa-box-open"></i>
+        Inventory
+    </a>
 
+    <a href="stock_alerts.php">
+        <i class="fas fa-triangle-exclamation"></i>
+        Stock Alerts
+    </a>
 
-<a
-href="dashboard.php"
-class="active">
+    <div class="menu-title">
+    SALES
+    </div>
 
-<i class="fas fa-home"></i>
+    <a href="pos.php">
+        <i class="fas fa-cash-register"></i>
+        Point of Sale
+    </a>
 
-Dashboard
+    <a href="sales_history.php">
+        <i class="fas fa-clock-rotate-left"></i>
+        Sales History
+    </a>
 
-</a>
-
-
-<div class="menu-title">
-
-INVENTORY
-
-</div>
-
-
-<a href="products.php">
-
-<i class="fas fa-pills"></i>
-
-Products
-
-</a>
-
-
-<a href="inventory.php">
-
-<i class="fas fa-box-open"></i>
-
-Inventory
-
-</a>
-
-
-<a href="stock_alerts.php">
-
-<i class="fas fa-triangle-exclamation"></i>
-
-Stock Alerts
-
-</a>
-
-
-<div class="menu-title">
-
-SALES
-
-</div>
-
-
-<a href="pos.php">
-
-<i class="fas fa-cash-register"></i>
-
-Point of Sale
-
-</a>
-
-
-<a href="sales_history.php">
-
-<i class="fas fa-clock-rotate-left"></i>
-
-Sales History
-
-</a>
-
-
-<a href="reports.php">
-
-<i class="fas fa-chart-column"></i>
-
-Reports
-
-</a>
-
-
+    <a href="reports.php">
+        <i class="fas fa-chart-column"></i>
+        Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
+    </a>
 </div>
 
 

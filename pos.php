@@ -18,6 +18,10 @@ if (!isset($_SESSION['pos_cart'])) {
 $message = "";
 $error = "";
 
+$discountType = "None";
+$discountPercentage = 0;
+$discountAmount = 0;
+
 /*
 |--------------------------------------------------------------------------
 | Get Logged-in User
@@ -315,10 +319,24 @@ if (isset($_POST['add_to_cart'])) {
 |--------------------------------------------------------------------------
 */
 
-if (isset($_POST['complete_sale'])) {
+    if (isset($_POST['complete_sale'])) {
 
     $paymentMethod = $_POST['payment_method'] ?? 'Cash';
-    $amountTendered = (float)($_POST['amount_tendered'] ?? 0);
+
+    $amountTendered =
+    (float)($_POST['amount_tendered'] ?? 0);
+
+
+    $discountType =
+    $_POST['discount_type'] ?? 'None';
+
+
+    $customerName =
+    trim($_POST['customer_name'] ?? '');
+
+
+    $customerIdNumber =
+    trim($_POST['customer_id_number'] ?? '');
 
     if (empty($_SESSION['pos_cart'])) {
 
@@ -404,7 +422,23 @@ if (isset($_POST['complete_sale'])) {
             }
 
             unset($item);
+            if(
+                $discountType === "Senior Citizen"
+                ||
+                $discountType === "PWD"
+            )
+            {
 
+                $discountPercentage = 20;
+
+                $discountAmount =
+                    $totalAmount * 0.20;
+
+            }
+
+
+            $totalAmount =
+            $totalAmount - $discountAmount;
 
             /*
              * Validate payment AFTER the real
@@ -440,29 +474,42 @@ if (isset($_POST['complete_sale'])) {
 
             $stmt = $conn->prepare("
                 INSERT INTO sales
-                (
+                    (
                     cashier_id,
-                    sale_date,
                     total_amount,
+                    discount_type,
+                    discount_percentage,
+                    discount_amount,
+                    customer_name,
+                    customer_id_number,
                     payment_method,
                     amount_paid,
                     change_amount
-                )
+                    )
                 VALUES
-                (
-                    ?,
-                    NOW(),
-                    ?,
-                    ?,
-                    ?,
-                    ?
+               (
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?
                 )
             ");
 
             $stmt->bind_param(
-                "idsdd",
+                "idsddsssdd",
                 $cashierId,
                 $totalAmount,
+                $discountType,
+                $discountPercentage,
+                $discountAmount,
+                $customerName,
+                $customerIdNumber,
                 $paymentMethod,
                 $amountTendered,
                 $changeAmount
@@ -619,12 +666,25 @@ if (isset($_POST['complete_sale'])) {
              */
 
             $_SESSION['last_sale'] = [
+
                 'sale_id' => $saleId,
+
+                'subtotal' => $totalAmount + $discountAmount,
+
+                'discount_type' => $discountType,
+
+                'discount_amount' => $discountAmount,
+
                 'total' => $totalAmount,
+
                 'payment' => $amountTendered,
+
                 'change' => $changeAmount,
+
                 'payment_method' => $paymentMethod,
+
                 'items' => $receiptItems
+
             ];
             header("Location: pos.php?sale_complete=1");
             exit;
@@ -1453,9 +1513,9 @@ input[type="number"] {
 <body>
 
 
-<!-- =========================================================
+<!-- =========================
      SIDEBAR
-========================================================= -->
+========================= -->
 <div class="sidebar">
     <div class="logo">
         ValueMeds
@@ -1475,7 +1535,7 @@ input[type="number"] {
         Products
     </a>
 
-    <a href="inventory.php">
+    <a href="inventory.php" class="active">
         <i class="fas fa-box-open"></i>
         Inventory
     </a>
@@ -1485,11 +1545,11 @@ input[type="number"] {
         Stock Alerts
     </a>
 
-<div class="menu-title">
-SALES
-</div>
+    <div class="menu-title">
+    SALES
+    </div>
 
-    <a href="pos.php" class="active">
+    <a href="pos.php">
         <i class="fas fa-cash-register"></i>
         Point of Sale
     </a>
@@ -1502,6 +1562,14 @@ SALES
     <a href="reports.php">
         <i class="fas fa-chart-column"></i>
         Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
     </a>
 </div>
 
@@ -2083,11 +2151,45 @@ Payment Summary
 </div>
 
 
+<!-- SUBTOTAL -->
+
 <div class="summary-row">
 
-<span>Total Amount</span>
+<span>
+Subtotal
+</span>
 
-<b>
+<b id="subtotalDisplay">
+PHP <?php echo number_format($totalAmount, 2); ?>
+</b>
+
+</div>
+
+
+<!-- DISCOUNT -->
+
+<div class="summary-row">
+
+<span>
+Discount
+</span>
+
+<b id="discountDisplay">
+PHP 0.00
+</b>
+
+</div>
+
+
+<!-- FINAL TOTAL -->
+
+<div class="summary-row total">
+
+<span>
+Total Amount
+</span>
+
+<b id="finalTotalDisplay">
 PHP <?php echo number_format($totalAmount, 2); ?>
 </b>
 
@@ -2095,7 +2197,58 @@ PHP <?php echo number_format($totalAmount, 2); ?>
 
 
 <form method="POST">
+<div class="group" style="margin-top:15px;">
 
+<label>
+Discount
+</label>
+
+<select 
+name="discount_type" 
+id="discount_type"
+onchange="updateDiscount()">
+
+<option value="None">
+No Discount
+</option>
+
+<option value="Senior Citizen">
+Senior Citizen (20%)
+</option>
+
+<option value="PWD">
+PWD (20%)
+</option>
+
+</select>
+
+</div>
+
+
+<div class="group" style="margin-top:15px;">
+
+<label>
+Customer Full Name (Optional)
+</label>
+
+<input
+type="text"
+name="customer_name">
+
+</div>
+
+
+<div class="group" style="margin-top:15px;">
+
+<label>
+ID Number (Optional)
+</label>
+
+<input
+type="text"
+name="customer_id_number">
+
+</div>
 
 <div
 class="group"
@@ -2269,7 +2422,37 @@ receipt-details
                     ); ?>
                 </strong>
             </div>
+            <div>
 
+            <span>Subtotal</span>
+            <strong>
+                PHP
+                <?php
+                echo number_format(
+                    $_SESSION['last_sale']['subtotal'],
+                    2
+                );
+                ?>
+                </strong>
+            </div>
+            <div>
+                <span>Discount</span>
+                <strong>
+                <?php
+                echo htmlspecialchars(
+                    $_SESSION['last_sale']['discount_type']
+                );
+                ?>
+                <br>
+                PHP
+                <?php
+                echo number_format(
+                    $_SESSION['last_sale']['discount_amount'],
+                    2
+                );
+                ?>
+                </strong>
+            </div>
             <div>
                 <span>Total</span>
                 <strong>
@@ -2436,7 +2619,11 @@ function getPageTotalAmount() {
     return 0;
 }
 
-const totalAmount = getPageTotalAmount();
+const subtotalAmount = getPageTotalAmount();
+
+let discountAmount = 0;
+
+let finalTotalAmount = subtotalAmount;
 
 const paymentInput =
     document.getElementById("amount_tendered");
@@ -2455,7 +2642,7 @@ function updateChange() {
         parseFloat(paymentInput.value) || 0;
 
     const change =
-        amount - totalAmount;
+        amount - finalTotalAmount;
 
     if (amount <= 0) {
 
@@ -2494,7 +2681,7 @@ function validatePayment() {
         return;
     }
 
-    if (totalAmount <= 0) {
+    if (finalTotalAmount <= 0) {
 
         checkoutButton.disabled = true;
         return;
@@ -2504,9 +2691,54 @@ function validatePayment() {
         parseFloat(paymentInput.value) || 0;
 
     checkoutButton.disabled =
-        amount < totalAmount;
+        amount < finalTotalAmount;
 }
 
+function updateDiscount(){
+
+    const discountType =
+        document.getElementById("discount_type").value;
+
+
+    if(
+        discountType === "Senior Citizen" ||
+        discountType === "PWD"
+    ){
+
+        discountAmount =
+            subtotalAmount * 0.20;
+
+    }else{
+
+        discountAmount = 0;
+
+    }
+
+
+    finalTotalAmount =
+        subtotalAmount - discountAmount;
+
+
+
+    document.getElementById(
+        "discountDisplay"
+    ).textContent =
+        "PHP " + discountAmount.toFixed(2);
+
+
+
+    document.getElementById(
+        "finalTotalDisplay"
+    ).textContent =
+        "PHP " + finalTotalAmount.toFixed(2);
+
+
+
+    updateChange();
+
+    validatePayment();
+
+}
 
 function updatePaymentLabel() {
 
@@ -3100,6 +3332,16 @@ async function printReceipt() {
         =====================
         */
 
+       let subtotal =
+            getReceiptValue(
+                "Subtotal"
+            );
+
+
+        let discount =
+            getReceiptValue(
+                "Discount"
+            );
 
         let total =
             getReceiptValue(
@@ -3125,6 +3367,20 @@ async function printReceipt() {
             );
 
 
+        data.push(
+            row(
+                "SUBTOTAL:",
+                subtotal
+            )
+        );
+
+
+        data.push(
+            row(
+                "DISCOUNT:",
+                discount
+            )
+        );
 
         data.push(
             row(
@@ -3133,10 +3389,7 @@ async function printReceipt() {
             )
         );
 
-
         data.push("\n");
-
-
 
         data.push(
             row(
@@ -3145,14 +3398,12 @@ async function printReceipt() {
             )
         );
 
-
         data.push(
             row(
                 "Quantity:",
                 quantityTotal.toString()
             )
         );
-
 
         data.push(
             row(
@@ -3161,7 +3412,6 @@ async function printReceipt() {
             )
         );
 
-
         data.push(
             row(
                 "Change:",
@@ -3169,11 +3419,9 @@ async function printReceipt() {
             )
         );
 
-
         data.push(
             line()
         );
-
 
         data.push(
             row(
@@ -3182,26 +3430,19 @@ async function printReceipt() {
             )
         );
 
-
         data.push("\n\n");
-
-
 
         data.push(
             ESC+"a"+"\x01"
         );
 
-
         data.push(
             "Thank you!\n"
         );
 
-
         data.push(
             "for your Purchase.\n"
         );
-
-
 
          data.push("\n");
         data.push("\n");
@@ -3217,17 +3458,14 @@ async function printReceipt() {
         data.push("\n");
         data.push("\n");
 
-
         await qz.print(
             config,
             data
         );
 
-
         console.log(
             "Receipt printed successfully."
         );
-
 
     }
     catch(error){
@@ -3236,7 +3474,6 @@ async function printReceipt() {
             error
         );
 
-
         alert(
             "Unable to print receipt. Check QZ Tray and UTAK007 connection."
         );
@@ -3244,7 +3481,6 @@ async function printReceipt() {
     }
 
 }
-
 
 updateChange();
 validatePayment();

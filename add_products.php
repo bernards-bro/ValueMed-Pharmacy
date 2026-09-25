@@ -509,12 +509,12 @@ font-size:24px;
         INVENTORY
     </div>
 
-    <a href="products.php" class="active">
+    <a href="products.php">
         <i class="fas fa-pills"></i>
         Products
     </a>
 
-    <a href="inventory.php">
+    <a href="inventory.php" class="active">
         <i class="fas fa-box-open"></i>
         Inventory
     </a>
@@ -524,9 +524,9 @@ font-size:24px;
         Stock Alerts
     </a>
 
-<div class="menu-title">
-SALES
-</div>
+    <div class="menu-title">
+    SALES
+    </div>
 
     <a href="pos.php">
         <i class="fas fa-cash-register"></i>
@@ -541,6 +541,14 @@ SALES
     <a href="reports.php">
         <i class="fas fa-chart-column"></i>
         Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
     </a>
 </div>
 

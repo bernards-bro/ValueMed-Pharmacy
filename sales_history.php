@@ -335,6 +335,10 @@ if ($viewSaleId > 0) {
             s.sale_id,
             s.sale_date,
             s.total_amount,
+            s.discount_type,
+            s.discount_amount,
+            s.customer_name,
+            s.customer_id_number,
             s.payment_method,
             s.amount_paid,
             s.change_amount,
@@ -955,9 +959,9 @@ grid-template-columns:1fr;
 <body>
 
 
-<!-- =========================================================
+<!-- =========================
      SIDEBAR
-========================================================= -->
+========================= -->
 <div class="sidebar">
     <div class="logo">
         ValueMeds
@@ -977,7 +981,7 @@ grid-template-columns:1fr;
         Products
     </a>
 
-    <a href="inventory.php">
+    <a href="inventory.php" class="active">
         <i class="fas fa-box-open"></i>
         Inventory
     </a>
@@ -987,16 +991,16 @@ grid-template-columns:1fr;
         Stock Alerts
     </a>
 
-<div class="menu-title">
-SALES
-</div>
+    <div class="menu-title">
+    SALES
+    </div>
 
     <a href="pos.php">
         <i class="fas fa-cash-register"></i>
         Point of Sale
     </a>
 
-    <a href="sales_history.php" class="active">
+    <a href="sales_history.php">
         <i class="fas fa-clock-rotate-left"></i>
         Sales History
     </a>
@@ -1004,6 +1008,14 @@ SALES
     <a href="reports.php">
         <i class="fas fa-chart-column"></i>
         Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
     </a>
 </div>
 
@@ -1483,7 +1495,30 @@ No sales transactions found.
                         ); ?>
                     </strong>
                 </div>
-
+                <?php
+                if(
+                    $selectedSale['discount_type'] === 'PWD'
+                    ||
+                    $selectedSale['discount_type'] === 'Senior Citizen'
+                ):
+                ?>
+                <div>
+                    <span>Customer Name</span>
+                    <strong>
+                    <?= htmlspecialchars(
+                        $selectedSale['customer_name'] ?? ''
+                    ); ?>
+                    </strong>
+                </div>
+                <div>
+                    <span>ID Number</span>
+                    <strong>
+                    <?= htmlspecialchars(
+                        $selectedSale['customer_id_number'] ?? ''
+                    ); ?>
+                    </strong>
+                </div>
+                <?php endif; ?>
                 <div>
                     <span>Payment</span>
                     <strong>
@@ -1551,17 +1586,64 @@ No sales transactions found.
 
             <div class="receipt-divider"></div>
 
-            <!-- TOTAL -->
-            <div class="receipt-total">
+                <!-- SUMMARY -->
 
-                <span>TOTAL</span>
+                <div class="receipt-payment">
 
-                <span>
+                    <?php
+                    $subtotal =
+                        $selectedSale['total_amount']
+                        +
+                        ($selectedSale['discount_amount'] ?? 0);
+                    ?>
+
+
+                    <?php if(
+                        ($selectedSale['discount_type'] ?? 'None') === 'PWD'
+                        ||
+                        ($selectedSale['discount_type'] ?? 'None') === 'Senior Citizen'
+                    ): ?>
+                <div>
+                    <strong>Subtotal</strong>
+
+                    <span>
                     ₱<?= number_format(
-                        $selectedSale['total_amount'],
+                        $subtotal,
                         2
                     ); ?>
-                </span>
+                    </span>
+                </div>
+                <div>
+                    <strong>
+                    Discount
+                    </strong>
+                    <span>
+                        <?= htmlspecialchars(
+                            $selectedSale['discount_type']
+                        ); ?>
+
+                        <br>
+
+                        -₱<?= number_format(
+                            $selectedSale['discount_amount'],
+                            2
+                        ); ?>
+                    </span>
+                </div>
+                    <?php endif; ?>
+                    <div class="receipt-total">
+                        <span>
+                        TOTAL
+                        </span>
+                        <span>
+                            ₱<?= number_format(
+                                $selectedSale['total_amount'],
+                                2
+                            ); ?>
+                    </span>
+
+                </div>
+
 
             </div>
 

@@ -756,7 +756,7 @@ grid-template-columns:1fr;
         Products
     </a>
 
-    <a href="inventory.php" >
+    <a href="inventory.php" class="active">
         <i class="fas fa-box-open"></i>
         Inventory
     </a>
@@ -780,9 +780,17 @@ grid-template-columns:1fr;
         Sales History
     </a>
 
-    <a href="reports.php" class="active">
+    <a href="reports.php">
         <i class="fas fa-chart-column"></i>
         Reports
+    </a>
+    <a href="refund.php">
+        <i class="fas fa-chart-recycle"></i>
+        refund
+    </a>
+    <a href="exchanges.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Item Exchange
     </a>
 </div>
 
