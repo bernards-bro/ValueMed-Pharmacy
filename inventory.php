@@ -1,9 +1,7 @@
 ﻿<?php
 require 'connection.php';
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+$fullname = $_SESSION['fullname'] ?? 'Admin';
 
 /* =========================
    DELETE MEDICINE
@@ -119,7 +117,9 @@ if ($search !== "") {
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-
+<script
+src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js">
+</script>
 <style>
 
 *{
@@ -431,7 +431,127 @@ tr:hover{
     .search-form input{
         width:250px;
     }
+   
 }
+
+ /* =========================
+       QR BUTTON
+    ========================= */
+
+    .qr-btn{
+        background:#16246D;
+        color:white;
+        border:none;
+        padding:8px 12px;
+        border-radius:8px;
+        cursor:pointer;
+    }
+
+    .qr-btn:hover{
+        background:#2b45b5;
+    }
+
+    /* =========================
+       QR MODAL
+    ========================= */
+
+    .qr-modal{
+        display:none;
+        position:fixed;
+        z-index:9999;
+        left:0;
+        top:0;
+        width:100%;
+        height:100%;
+        background:rgba(0,0,0,.6);
+
+        justify-content:center;
+        align-items:center;
+    }
+
+    .qr-modal-content{
+        position:relative;
+        background:white;
+        width:420px;
+        max-width:90%;
+        padding:30px;
+        border-radius:20px;
+        text-align:center;
+
+        box-shadow:0 10px 30px rgba(0,0,0,.25);
+    }
+
+    .qr-modal-content h2{
+        color:#16246D;
+        margin-bottom:10px;
+    }
+
+    .qr-product-name{
+        color:#555;
+        margin-bottom:15px;
+    }
+
+    .qr-product-value{
+        color:#16246D;
+        font-weight:600;
+        font-size:16px;
+        margin:15px 0 20px;
+    }
+
+    .product-qrcode{
+        display:flex;
+        justify-content:center;
+        margin:20px 0;
+    }
+
+    .qr-close{
+        position:absolute;
+        top:12px;
+        right:18px;
+
+        border:none;
+        background:none;
+
+        font-size:30px;
+        color:#555;
+
+        cursor:pointer;
+    }
+
+    .qr-close:hover{
+        color:#16246D;
+    }
+
+    .qr-modal-buttons{
+        display:flex;
+        justify-content:center;
+        gap:10px;
+    }
+
+    .qr-modal-buttons button{
+        border:none;
+        color:white;
+        padding:11px 18px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:600;
+    }
+
+    .qr-modal-buttons .download-qr{
+        background:#16246D;
+    }
+
+    .qr-modal-buttons .print-qr{
+        background:#555;
+    }
+
+    .qr-modal-buttons .download-qr:hover{
+        background:#2b45b5;
+    }
+
+    .qr-modal-buttons .print-qr:hover{
+        background:#333;
+    }
 </style>
 </head>
 
@@ -468,9 +588,9 @@ tr:hover{
         Stock Alerts
     </a>
 
-<div class="menu-title">
-SALES
-</div>
+    <div class="menu-title">
+    SALES
+    </div>
 
     <a href="pos.php">
         <i class="fas fa-cash-register"></i>
@@ -497,9 +617,12 @@ SALES
     <div class="header">
         <h1>INVENTORY</h1>
         <div class="admin">
-            <i class="fas fa-user"></i>
-            Admin
-        </div>
+
+    <i class="fas fa-user"></i>
+
+    <?= htmlspecialchars($fullname); ?>
+
+</div>
     </div>
 
     <div class="container">
@@ -553,6 +676,7 @@ SALES
                     <th>Stock</th>
                     <th>Status</th>
                     <th>Expiration</th>
+                    <th>QR Code</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -656,6 +780,27 @@ SALES
                                 <?= htmlspecialchars($expiryDate) ?>
                             </td>
 
+                            <!-- QR CODE -->
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="qr-btn"
+                                    onclick="showQR(
+                                        <?= (int)$medicine['medicine_id'] ?>,
+                                        '<?= htmlspecialchars(
+                                            $medicine['name'],
+                                            ENT_QUOTES
+                                        ) ?>'
+                                    )">
+
+                                    <i class="fas fa-qrcode"></i>
+                                    QR
+
+                                </button>
+
+                            </td>
+
                             <!-- ACTIONS -->
                             <td>
                                 <div class="actions">
@@ -692,7 +837,7 @@ SALES
                 ?>
                     <tr>
                         <td
-                           colspan="7"
+                           colspan="8"
                             style="text-align:center;padding:30px;"
                         >
                             No medicines found.
@@ -706,5 +851,548 @@ SALES
         </div>
     </div>
 </div>
+<!-- QR MODAL -->
+
+<div
+    id="qrModal"
+    class="qr-modal">
+
+    <div class="qr-modal-content">
+
+        <button
+            type="button"
+            class="qr-close"
+            onclick="closeQR()">
+
+            &times;
+
+        </button>
+
+        <h2>
+            Product QR Code
+        </h2>
+
+        <p
+            id="qrProductName"
+            class="qr-product-name">
+        </p>
+
+        <div
+            id="productQRCode"
+            class="product-qrcode">
+        </div>
+
+        <div
+            id="qrProductValue"
+            class="qr-product-value">
+        </div>
+
+        <div class="qr-modal-buttons">
+
+            <button
+                type="button"
+                class="download-qr"
+                onclick="downloadProductQR()">
+
+                <i class="fas fa-download"></i>
+                Download
+
+            </button>
+
+            <button
+                type="button"
+                class="print-qr"
+                onclick="printProductQR()">
+
+                <i class="fas fa-print"></i>
+                Print
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+let currentQRValue = "";
+let currentProductName = "";
+
+function showQR(medicineId, productName)
+{
+    currentQRValue = "VM-MED-" + medicineId;
+    currentProductName = productName;
+
+    document.getElementById("qrProductName").textContent =
+        productName;
+
+    document.getElementById("qrProductValue").textContent =
+        currentQRValue;
+
+    const qrContainer =
+        document.getElementById("productQRCode");
+
+    qrContainer.innerHTML = "";
+
+    new QRCode(
+        qrContainer,
+        {
+            text: currentQRValue,
+            width: 250,
+            height: 250,
+            correctLevel: QRCode.CorrectLevel.H
+        }
+    );
+
+    document.getElementById("qrModal").style.display = "flex";
+}
+
+function closeQR()
+{
+    document.getElementById("qrModal").style.display = "none";
+}
+
+function downloadProductQR()
+{
+    const canvas =
+        document.querySelector("#productQRCode canvas");
+
+    if (!canvas) {
+        alert("QR code is not ready yet.");
+        return;
+    }
+
+    const link = document.createElement("a");
+
+    link.download = currentQRValue + ".png";
+
+    link.href = canvas.toDataURL("image/png");
+
+    link.click();
+}
+
+function printProductQR()
+{
+    if (!currentQRValue) {
+        alert("QR code is not ready yet.");
+        return;
+    }
+
+    const qrCanvas =
+        document.querySelector("#productQRCode canvas");
+
+    if (!qrCanvas) {
+        alert("QR code is not ready yet.");
+        return;
+    }
+
+    /*
+     * Create a completely separate PNG image
+     * from the QR canvas.
+     */
+    const qrImage =
+        qrCanvas.toDataURL("image/png");
+
+
+    const printWindow =
+        window.open(
+            "",
+            "_blank",
+            "width=500,height=700"
+        );
+
+
+    if (!printWindow) {
+
+        alert(
+            "Please allow pop-ups for this website."
+        );
+
+        return;
+    }
+
+
+    printWindow.document.open();
+
+
+    printWindow.document.write(`
+
+        <!DOCTYPE html>
+
+        <html>
+
+        <head>
+
+            <meta charset="UTF-8">
+
+            <title>ValueMeds QR Label</title>
+
+
+            <style>
+
+                @page {
+
+                    size: 80mm auto;
+
+                    margin: 0;
+                }
+
+
+                html,
+                body {
+
+                    margin: 0;
+
+                    padding: 0;
+
+                    width: 80mm;
+
+                    background: #ffffff;
+
+                    font-family: Arial, sans-serif;
+
+                    -webkit-print-color-adjust: exact;
+
+                    print-color-adjust: exact;
+                }
+
+
+                * {
+
+                    box-sizing: border-box;
+                }
+
+
+                body {
+
+                    display: block;
+                }
+
+
+                .label {
+
+                    width: 79.5mm;
+
+                    text-align: center;
+
+                    padding:
+                        4mm
+                        3mm
+                        5mm
+                        3mm;
+
+                    margin: 0 auto;
+                }
+
+
+                .brand {
+
+                    font-size: 19px;
+
+                    font-weight: bold;
+
+                    color: #000000;
+
+                    margin-bottom: 2mm;
+                }
+
+
+                .product-name {
+
+                    font-size: 14px;
+
+                    font-weight: bold;
+
+                    color: #000000;
+
+                    margin-bottom: 3mm;
+
+                    line-height: 1.2;
+
+                    overflow-wrap: break-word;
+
+                    word-break: break-word;
+                }
+
+
+                /*
+                 * QR IMAGE
+                 *
+                 * Use a fixed physical size instead
+                 * of relying on the original canvas size.
+                 */
+                .qr-image {
+
+                    display: block;
+
+                    width: 50mm;
+
+                    height: 50mm;
+
+                    min-width: 50mm;
+
+                    min-height: 50mm;
+
+                    max-width: 50mm;
+
+                    max-height: 50mm;
+
+                    margin: 0 auto 3mm auto;
+
+                    object-fit: contain;
+
+                    image-rendering: pixelated;
+                }
+
+
+                .qr-value {
+
+                    font-size: 12px;
+
+                    font-weight: bold;
+
+                    color: #000000;
+
+                    letter-spacing: 1px;
+
+                    margin-top: 1mm;
+                }
+
+
+                .instruction {
+
+                    font-size: 9px;
+
+                    color: #000000;
+
+                    margin-top: 2mm;
+                }
+
+
+                /*
+                 * Prevent the QR image from being
+                 * accidentally treated as a background.
+                 */
+                img {
+
+                    visibility: visible !important;
+
+                    opacity: 1 !important;
+                }
+
+
+                @media print {
+
+                    html,
+                    body {
+
+                        width: 80mm;
+
+                        margin: 0;
+
+                        padding: 0;
+                    }
+
+
+                    .label {
+
+                        width: 79.5mm;
+
+                        margin: 0;
+
+                        padding:
+                            4mm
+                            3mm
+                            5mm
+                            3mm;
+                    }
+
+
+                    .qr-image {
+
+                        display: block !important;
+
+                        visibility: visible !important;
+
+                        opacity: 1 !important;
+
+                        width: 50mm !important;
+
+                        height: 50mm !important;
+                    }
+
+                }
+
+            </style>
+
+        </head>
+
+
+        <body>
+
+            <div class="label">
+
+
+                <div class="brand">
+                    ValueMeds
+                </div>
+
+
+                <div class="product-name">
+                    ${escapeHTML(currentProductName)}
+                </div>
+
+
+                <img
+                    id="qrPrintImage"
+                    class="qr-image"
+                    src="${qrImage}"
+                    alt="ValueMeds QR Code"
+                >
+
+
+                <div class="qr-value">
+                    ${currentQRValue}
+                </div>
+
+
+                <div class="instruction">
+                    Scan to identify product
+                </div>
+
+
+            </div>
+
+
+            <script>
+
+                const qrImage =
+                    document.getElementById(
+                        "qrPrintImage"
+                    );
+
+
+                function startPrinting()
+                {
+
+                    if (!qrImage) {
+
+                        window.print();
+
+                        return;
+                    }
+
+
+                    /*
+                     * Make absolutely sure the PNG
+                     * has finished decoding.
+                     */
+                    if (
+                        qrImage.complete &&
+                        qrImage.naturalWidth > 0
+                    ) {
+
+                        qrImage.decode()
+                            .then(function()
+                            {
+
+                                setTimeout(
+                                    function()
+                                    {
+
+                                        window.focus();
+
+                                        window.print();
+
+                                    },
+                                    300
+                                );
+
+                            })
+                            .catch(function()
+                            {
+
+                                setTimeout(
+                                    function()
+                                    {
+
+                                        window.focus();
+
+                                        window.print();
+
+                                    },
+                                    300
+                                );
+
+                            });
+
+                    }
+
+                    else {
+
+                        qrImage.onload =
+                            function()
+                            {
+
+                                setTimeout(
+                                    function()
+                                    {
+
+                                        window.focus();
+
+                                        window.print();
+
+                                    },
+                                    300
+                                );
+
+                            };
+
+                    }
+
+                }
+
+
+                window.onload =
+                    function()
+                    {
+
+                        startPrinting();
+
+                    };
+
+            <\/script>
+
+        </body>
+
+        </html>
+
+    `);
+
+
+    printWindow.document.close();
+}
+
+function escapeHTML(value)
+{
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+window.onclick = function(event)
+{
+    const modal =
+        document.getElementById("qrModal");
+
+    if (event.target === modal) {
+        closeQR();
+    }
+};
+</script>
 </body>
 </html>

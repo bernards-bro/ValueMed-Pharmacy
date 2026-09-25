@@ -462,47 +462,47 @@ display:flex;
 ========================= */
 
 .sidebar{
-width:250px;
-height:100vh;
-background:#16246D;
-color:white;
-position:fixed;
-left:0;
-top:0;
-overflow:auto;
+    width:250px;
+    height:100vh;
+    background:#16246D;
+    color:white;
+    position:fixed;
+    left:0;
+    top:0;
+    overflow:auto;
 }
 
 .logo{
-padding:25px;
-font-size:25px;
-font-weight:bold;
-text-align:center;
-border-bottom:1px solid rgba(255,255,255,.15);
+    padding:25px;
+    font-size:25px;
+    font-weight:bold;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.15);
 }
 
 .menu-title{
-padding:20px 25px 10px;
-font-size:13px;
-opacity:.7;
-letter-spacing:1px;
+    padding:20px 25px 10px;
+    font-size:13px;
+    opacity:.7;
+    letter-spacing:1px;
 }
 
 .sidebar a{
-display:block;
-padding:14px 25px;
-color:white;
-text-decoration:none;
-transition:.3s;
+    display:block;
+    padding:14px 25px;
+    color:white;
+    text-decoration:none;
+    transition:.3s;
 }
 
 .sidebar a i{
-width:25px;
+    width:25px;
 }
 
 .sidebar a:hover,
 .sidebar .active{
-background:#8FB3E2;
-color:#16246D;
+    background:#8FB3E2;
+    color:#16246D;
 }
 
 
@@ -714,6 +714,163 @@ padding:35px;
 color:#777;
 }
 
+/* =========================
+   RECEIPT MODAL
+========================= */
+
+.receipt-modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.55);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+
+.receipt-modal.active{
+    display:flex;
+}
+
+.receipt-modal-content{
+    position:relative;
+    max-width:100%;
+    max-height:90vh;
+    overflow-y:auto;
+}
+
+.receipt-close{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:35px;
+    height:35px;
+    border:none;
+    border-radius:50%;
+    background:#16246D;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+    z-index:10;
+}
+
+.receipt-close:hover{
+    background:#0f194f;
+}
+
+/* =========================
+   RECEIPT VIEW
+========================= */
+
+.receipt-wrapper{
+    display:flex;
+    justify-content:center;
+    padding:10px 0;
+}
+
+.receipt{
+    width:380px;
+    max-width:100%;
+    background:white;
+    padding:25px;
+    border:1px solid #ddd;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-family:Arial,sans-serif;
+}
+
+.receipt-header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.receipt-header h2{
+    color:#16246D;
+    margin-bottom:5px;
+}
+
+.receipt-header p{
+    font-size:13px;
+    color:#666;
+}
+
+.receipt-divider{
+    border-top:1px dashed #888;
+    margin:15px 0;
+}
+
+.receipt-info{
+    font-size:13px;
+    line-height:1.7;
+}
+
+.receipt-info div{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+}
+
+.receipt-items{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+}
+
+.receipt-items th{
+    background:none;
+    color:#222;
+    padding:6px 0;
+    border-bottom:1px dashed #888;
+}
+
+.receipt-items td{
+    padding:8px 0;
+    border-bottom:none;
+    white-space:normal;
+}
+
+.receipt-items th:first-child,
+.receipt-items td:first-child{
+    text-align:left;
+}
+
+.receipt-items th:not(:first-child),
+.receipt-items td:not(:first-child){
+    text-align:right;
+}
+
+.receipt-total{
+    display:flex;
+    justify-content:space-between;
+    font-size:18px;
+    font-weight:bold;
+    color:#16246D;
+}
+
+.receipt-payment{
+    font-size:13px;
+    line-height:1.8;
+}
+
+.receipt-footer{
+    text-align:center;
+    margin-top:20px;
+    font-size:12px;
+    color:#666;
+}
+
+.receipt-status{
+    display:inline-block;
+    margin-top:8px;
+    padding:5px 12px;
+    border-radius:20px;
+    background:#dff5e1;
+    color:#1b6b2a;
+    font-weight:bold;
+    font-size:12px;
+}
 .sale-heading{
 color:#16246D;
 margin-bottom:20px;
@@ -1259,366 +1416,220 @@ No sales transactions found.
 
 <div class="container">
 
-
 <?php if ($selectedSale): ?>
 
+<div class="receipt-modal active" id="receiptModal">
 
-<?php
+    <div class="receipt-modal-content">
 
-$invoice =
-    'INV-' .
-    date(
-        'Y',
-        strtotime(
-            $selectedSale['sale_date']
-        )
-    ) .
-    '-' .
-    str_pad(
-        $selectedSale['sale_id'],
-        4,
-        '0',
-        STR_PAD_LEFT
-    );
+        <button
+            type="button"
+            class="receipt-close"
+            onclick="closeReceipt()"
+            title="Close">
+            <i class="fas fa-times"></i>
+        </button>
 
-?>
+        <div class="receipt">
 
+            <!-- RECEIPT HEADER -->
+            <div class="receipt-header">
 
-<div class="sale-heading">
+                <h2>ValueMeds</h2>
 
-<h3>
-Sale Details
-</h3>
+                <p>Pharmacy Management System</p>
 
+                <p>Official Sales Receipt</p>
 
-<span class="sale-total">
+            </div>
 
-₱<?php
+            <div class="receipt-divider"></div>
 
-echo number_format(
-    $selectedSale['total_amount'],
-    2
-);
+            <!-- SALE INFORMATION -->
+            <div class="receipt-info">
 
-?>
+                <div>
+                    <span>Invoice No.</span>
+                    <strong>
+                        <?= htmlspecialchars($invoice); ?>
+                    </strong>
+                </div>
 
-</span>
+                <div>
+                    <span>Date</span>
+                    <strong>
+                        <?= date(
+                            'M d, Y',
+                            strtotime($selectedSale['sale_date'])
+                        ); ?>
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Time</span>
+                    <strong>
+                        <?= date(
+                            'h:i A',
+                            strtotime($selectedSale['sale_date'])
+                        ); ?>
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Cashier</span>
+                    <strong>
+                        <?= htmlspecialchars(
+                            $selectedSale['cashier']
+                        ); ?>
+                    </strong>
+                </div>
+
+                <div>
+                    <span>Payment</span>
+                    <strong>
+                        <?= htmlspecialchars(
+                            $selectedSale['payment_method']
+                        ); ?>
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <!-- ITEMS -->
+            <table class="receipt-items">
+
+                <thead>
+
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Amount</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    <?php foreach ($saleItems as $item): ?>
+
+                        <tr>
+
+                            <td>
+                                <?= htmlspecialchars(
+                                    $item['name']
+                                ); ?>
+                            </td>
+
+                            <td>
+                                <?= (int)$item['quantity']; ?>
+                            </td>
+
+                            <td>
+                                ₱<?= number_format(
+                                    $item['unit_price'],
+                                    2
+                                ); ?>
+                            </td>
+
+                            <td>
+                                ₱<?= number_format(
+                                    $item['subtotal'],
+                                    2
+                                ); ?>
+                            </td>
+
+                        </tr>
+
+                    <?php endforeach; ?>
+
+                </tbody>
+
+            </table>
+
+            <div class="receipt-divider"></div>
+
+            <!-- TOTAL -->
+            <div class="receipt-total">
+
+                <span>TOTAL</span>
+
+                <span>
+                    ₱<?= number_format(
+                        $selectedSale['total_amount'],
+                        2
+                    ); ?>
+                </span>
+
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <!-- PAYMENT -->
+            <div class="receipt-payment">
+
+                <div>
+                    <strong>Items</strong>
+                    <span><?= count($saleItems); ?></span>
+                </div>
+
+                <div>
+                    <strong>Quantity</strong>
+                    <span><?= $selectedTotalQuantity; ?></span>
+                </div>
+
+                <div>
+                    <strong>Amount Paid</strong>
+                    <span>
+                        ₱<?= number_format(
+                            $selectedSale['amount_paid'],
+                            2
+                        ); ?>
+                    </span>
+                </div>
+
+                <div>
+                    <strong>Change</strong>
+                    <span>
+                        ₱<?= number_format(
+                            $selectedSale['change_amount'],
+                            2
+                        ); ?>
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <!-- STATUS -->
+            <div class="receipt-footer">
+
+                <div class="receipt-status">
+                    Completed
+                </div>
+
+                <p>
+                    Thank you for shopping with ValueMeds!
+                </p>
+
+                <p>
+                    Please keep this receipt for your records.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </div>
-
-
-<div class="details">
-
-
-<!-- SALE INFORMATION -->
-
-<div class="info">
-
-
-<p>
-
-<b>
-Invoice No.:
-</b>
-
-<?php
-echo htmlspecialchars($invoice);
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Date & Time:
-</b>
-
-<?php
-
-echo date(
-    'M d, Y | h:i A',
-    strtotime(
-        $selectedSale['sale_date']
-    )
-);
-
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Cashier:
-</b>
-
-<?php
-echo htmlspecialchars(
-    $selectedSale['cashier']
-);
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Payment Method:
-</b>
-
-<?php
-echo htmlspecialchars(
-    $selectedSale['payment_method']
-);
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Total Items:
-</b>
-
-<?php
-echo count($saleItems);
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Total Quantity:
-</b>
-
-<?php
-echo $selectedTotalQuantity;
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Amount Paid:
-</b>
-
-₱<?php
-
-echo number_format(
-    $selectedSale['amount_paid'],
-    2
-);
-
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Change:
-</b>
-
-₱<?php
-
-echo number_format(
-    $selectedSale['change_amount'],
-    2
-);
-
-?>
-
-</p>
-
-
-<p>
-
-<b>
-Status:
-</b>
-
-<span class="status">
-Completed
-</span>
-
-</p>
-
-
-</div>
-
-
-<!-- PRODUCT DETAILS -->
-
-<div class="product-box">
-
-
-<b>
-Product Details
-</b>
-
-
-<br><br>
-
-
-<?php if (!empty($saleItems)): ?>
-
-
-<table>
-
-<thead>
-
-<tr>
-
-<th>
-Product
-</th>
-
-<th>
-Price
-</th>
-
-<th>
-Qty
-</th>
-
-<th>
-Subtotal
-</th>
-
-</tr>
-
-</thead>
-
-
-<tbody>
-
-
-<?php foreach ($saleItems as $item): ?>
-
-
-<tr>
-
-
-<td>
-
-<?php
-
-echo htmlspecialchars(
-    $item['name']
-);
-
-?>
-
-<br>
-
-<small>
-
-<?php
-
-echo htmlspecialchars(
-    $item['category'] ?? ''
-);
-
-?>
-
-</small>
-
-</td>
-
-
-<td>
-
-₱<?php
-
-echo number_format(
-    $item['unit_price'],
-    2
-);
-
-?>
-
-</td>
-
-
-<td>
-
-<?php
-
-echo (int)$item['quantity'];
-
-?>
-
-</td>
-
-
-<td>
-
-₱<?php
-
-echo number_format(
-    $item['subtotal'],
-    2
-);
-
-?>
-
-</td>
-
-
-</tr>
-
-
-<?php endforeach; ?>
-
-
-</tbody>
-
-</table>
-
-
-<?php else: ?>
-
-
-<div class="no-sale">
-
-No product details found.
-
-</div>
-
 
 <?php endif; ?>
 
 
-</div>
-
-
-</div>
-
-
-<?php else: ?>
-
-
-<div class="no-sale">
-
-<i class="fas fa-receipt fa-2x"></i>
-
-<br><br>
-
-Select a transaction above to view its details.
-
-</div>
-
-
-<?php endif; ?>
 
 
 </div>
@@ -1626,6 +1637,29 @@ Select a transaction above to view its details.
 
 </div>
 
+<script>
+function closeReceipt() {
+    const modal = document.getElementById('receiptModal');
+
+    if (modal) {
+        modal.classList.remove('active');
+    }
+
+    // Remove the ?view=... parameter from the URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('view');
+
+    window.history.replaceState({}, '', url);
+}
+
+document.addEventListener('keydown', function(event) {
+
+    if (event.key === 'Escape') {
+        closeReceipt();
+    }
+
+});
+</script>
 
 </body>
 
