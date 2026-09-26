@@ -1,14 +1,229 @@
+<?php
+
+require 'connection.php';
+
+$fullname = $_SESSION['fullname'] ?? 'Admin';
+
+/*
+|--------------------------------------------------------------------------
+| Search and Filter
+|--------------------------------------------------------------------------
+*/
+
+$search = trim($_GET['search'] ?? '');
+$filter = $_GET['filter'] ?? 'all';
+
+/*
+|--------------------------------------------------------------------------
+| Build Query
+|--------------------------------------------------------------------------
+*/
+
+$conditions = [];
+$params = [];
+$types = "";
+
+/*
+| Only products with stock <= 20 are considered alerts.
+*/
+
+$conditions[] = "m.stock <= 20";
+
+/*
+| Search
+*/
+
+if ($search !== '') {
+
+    $conditions[] = "
+        (
+            m.name LIKE ?
+            OR m.category LIKE ?
+        )
+    ";
+
+    $searchParam = "%{$search}%";
+
+    $params[] = $searchParam;
+    $params[] = $searchParam;
+
+    $types .= "ss";
+}
+
+/*
+| Alert Filter
+*/
+
+if ($filter === 'out') {
+
+    $conditions[] = "m.stock = 0";
+
+}
+
+elseif ($filter === 'critical') {
+
+    $conditions[] = "m.stock > 0 AND m.stock <= 5";
+
+}
+
+elseif ($filter === 'low') {
+
+    $conditions[] = "m.stock > 5 AND m.stock <= 20";
+
+}
+
+
+$where = "";
+
+if (!empty($conditions)) {
+
+    $where = "WHERE " . implode(" AND ", $conditions);
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Get Alert Products
+|--------------------------------------------------------------------------
+*/
+
+$products = [];
+
+$sql = "
+    SELECT
+
+        m.medicine_id,
+        m.name,
+        m.category,
+        m.stock,
+        m.expiry_date
+
+    FROM medicines m
+
+    $where
+
+    ORDER BY
+        m.stock ASC,
+        m.expiry_date ASC,
+        m.name ASC
+";
+
+$stmt = $conn->prepare($sql);
+
+if (!empty($params)) {
+
+    $stmt->bind_param(
+        $types,
+        ...$params
+    );
+
+}
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+while ($row = $result->fetch_assoc()) {
+
+    $products[] = $row;
+
+}
+
+$stmt->close();
+
+
+/*
+|--------------------------------------------------------------------------
+| Alert Counts
+|--------------------------------------------------------------------------
+*/
+
+$outOfStock = 0;
+$criticalStock = 0;
+$lowStock = 0;
+
+/*
+| Out of Stock
+*/
+
+$result = $conn->query("
+    SELECT COUNT(*) AS total
+    FROM medicines
+    WHERE stock = 0
+");
+
+if ($result) {
+
+    $row = $result->fetch_assoc();
+
+    $outOfStock = (int)$row['total'];
+
+}
+
+
+/*
+| Critical Stock
+*/
+
+$result = $conn->query("
+    SELECT COUNT(*) AS total
+    FROM medicines
+    WHERE stock > 0
+    AND stock <= 5
+");
+
+if ($result) {
+
+    $row = $result->fetch_assoc();
+
+    $criticalStock = (int)$row['total'];
+
+}
+
+
+/*
+| Low Stock
+*/
+
+$result = $conn->query("
+    SELECT COUNT(*) AS total
+    FROM medicines
+    WHERE stock > 5
+    AND stock <= 20
+");
+
+if ($result) {
+
+    $row = $result->fetch_assoc();
+
+    $lowStock = (int)$row['total'];
+
+}
+
+
+$totalAlerts =
+    $outOfStock +
+    $criticalStock +
+    $lowStock;
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Stock Alerts</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet"
+<title>Stock Alerts - ValueMeds</title>
+
+<link
+rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
 <style>
@@ -25,44 +240,60 @@ background:#F5F7FC;
 display:flex;
 }
 
-/* Sidebar */
+/* =========================
+   SIDEBAR
+========================= */
 
 .sidebar{
-width:250px;
-height:100vh;
-background:#16246D;
-position:fixed;
-color:white;
+    width:250px;
+    height:100vh;
+    background:#16246D;
+    color:white;
+    position:fixed;
+    left:0;
+    top:0;
+    overflow:auto;
 }
 
 .logo{
-padding:25px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
+    padding:25px;
+    font-size:25px;
+    font-weight:bold;
+    text-align:center;
+    border-bottom:1px solid rgba(255,255,255,.15);
 }
 
 .menu-title{
-padding:20px 25px 10px;
-font-size:13px;
-opacity:.7;
+    padding:20px 25px 10px;
+    font-size:13px;
+    opacity:.7;
+    letter-spacing:1px;
 }
 
 .sidebar a{
-display:block;
-padding:15px 25px;
-text-decoration:none;
-color:white;
-transition:.3s;
+    display:block;
+    padding:14px 25px;
+    color:white;
+    text-decoration:none;
+    transition:.3s;
+}
+
+.sidebar a i{
+    width:25px;
 }
 
 .sidebar a:hover,
-.active{
-background:#8FB3E2;
-color:#16246D;
+.sidebar .active{
+    background:#8FB3E2;
+    color:#16246D;
 }
 
-/* Main */
+
+/*
+|--------------------------------------------------------------------------
+| Main
+|--------------------------------------------------------------------------
+*/
 
 .main{
 margin-left:250px;
@@ -70,11 +301,22 @@ width:calc(100% - 250px);
 padding:30px;
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| Header
+|--------------------------------------------------------------------------
+*/
+
 .header{
 display:flex;
 justify-content:space-between;
 align-items:center;
-margin-bottom:25px;
+margin-bottom:30px;
+}
+
+.header h1{
+color:#16246D;
 }
 
 .admin{
@@ -84,92 +326,249 @@ border-radius:30px;
 box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
+
+/*
+|--------------------------------------------------------------------------
+| Cards
+|--------------------------------------------------------------------------
+*/
+
+.cards{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:20px;
 margin-bottom:20px;
 }
 
-.filters{
-display:flex;
-gap:10px;
-}
-
-.filters button{
-padding:10px 18px;
-border:none;
-border-radius:30px;
-cursor:pointer;
+.card{
 background:white;
+padding:25px;
+border-radius:15px;
 box-shadow:0 5px 15px rgba(0,0,0,.08);
+border:1px solid #eee;
 }
 
-.filters button:hover,
-.filters .active-filter{
-background:#16246D;
-color:white;
+.card-title{
+color:#666;
+font-size:14px;
+margin-bottom:15px;
 }
 
-.export{
+.card-value{
+font-size:28px;
+font-weight:bold;
+color:#16246D;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Container
+|--------------------------------------------------------------------------
+*/
+
+.container{
+background:white;
+padding:25px;
+border-radius:20px;
+box-shadow:0 5px 15px rgba(0,0,0,.08);
+margin-bottom:20px;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Search
+|--------------------------------------------------------------------------
+*/
+
+.search-form{
+display:grid;
+grid-template-columns:1fr 220px auto auto;
+gap:12px;
+align-items:end;
+}
+
+.group{
+display:flex;
+flex-direction:column;
+}
+
+.group label{
+margin-bottom:8px;
+font-weight:600;
+color:#16246D;
+}
+
+.group input,
+.group select{
+padding:12px;
+border:1px solid #ccc;
+border-radius:10px;
+outline:none;
+background:white;
+}
+
+.group input:focus,
+.group select:focus{
+border-color:#16246D;
+}
+
+.search-btn{
 background:#16246D;
 color:white;
-padding:12px 20px;
 border:none;
-border-radius:30px;
+padding:12px 22px;
+border-radius:10px;
 cursor:pointer;
+font-weight:600;
 }
 
-.export:hover{
-background:#2743b8;
+.search-btn:hover{
+background:#2b45b5;
 }
 
-table{
+.clear-btn{
+background:#eee;
+color:#333;
+padding:12px 20px;
+border-radius:10px;
+text-decoration:none;
+font-weight:600;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Table
+|--------------------------------------------------------------------------
+*/
+
+.table-wrapper{
+overflow-x:auto;
+}
+
+.alert-table{
 width:100%;
 border-collapse:collapse;
-background:white;
-border-radius:15px;
-overflow:hidden;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
 }
 
-th{
-background:#16246D;
-color:white;
-padding:15px;
+.alert-table th{
+background:#eef4ff;
+color:#16246D;
+padding:14px;
+text-align:left;
+white-space:nowrap;
 }
 
-td{
-padding:15px;
-text-align:center;
+.alert-table td{
+padding:14px;
 border-bottom:1px solid #eee;
 }
 
-tr:hover{
-background:#F7F9FC;
+.alert-table tr:hover{
+background:#fafbff;
 }
 
-.low{
-color:#ff9800;
+
+/*
+|--------------------------------------------------------------------------
+| Stock Badges
+|--------------------------------------------------------------------------
+*/
+
+.badge{
+display:inline-block;
+padding:6px 12px;
+border-radius:20px;
+font-size:13px;
+font-weight:600;
+}
+
+.badge-out{
+background:#ffe1e1;
+color:#b00020;
+}
+
+.badge-critical{
+background:#fff0d5;
+color:#a85d00;
+}
+
+.badge-low{
+background:#fff9d8;
+color:#806900;
+}
+
+.stock-number{
 font-weight:bold;
 }
 
-.expiring{
-color:#e67e22;
-font-weight:bold;
-}
 
-.expired{
-color:red;
-font-weight:bold;
-}
+/*
+|--------------------------------------------------------------------------
+| Actions
+|--------------------------------------------------------------------------
+*/
 
-.view{
-background:#16246D;
-color:white;
+.action-btn{
+display:inline-block;
 padding:8px 12px;
 border-radius:8px;
+background:#eef4ff;
+color:#16246D;
 text-decoration:none;
+font-weight:600;
+font-size:13px;
+}
+
+.action-btn:hover{
+background:#dce8ff;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Empty
+|--------------------------------------------------------------------------
+*/
+
+.empty{
+text-align:center;
+padding:40px;
+color:#777;
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Responsive
+|--------------------------------------------------------------------------
+*/
+
+@media(max-width:1100px){
+
+.cards{
+grid-template-columns:1fr 1fr;
+}
+
+.search-form{
+grid-template-columns:1fr 1fr;
+}
+
+}
+
+@media(max-width:900px){
+
+.sidebar{
+width:200px;
+}
+
+.main{
+margin-left:200px;
+width:calc(100% - 200px);
+}
+
 }
 
 </style>
@@ -178,145 +577,435 @@ text-decoration:none;
 
 <body>
 
+
+<!-- =========================
+     SIDEBAR
+========================= -->
 <div class="sidebar">
+    <div class="logo">
+        ValueMeds
+    </div>
 
-<div class="logo">ValueMeds</div>
+    <a href="dashboard.php">
+        <i class="fas fa-home"></i>
+        Dashboard
+    </a>
 
-<a href="dashboard.php">
-<i class="fas fa-home"></i> Dashboard
+    <div class="menu-title">
+        INVENTORY
+    </div>
+
+    <a href="products.php">
+        <i class="fas fa-pills"></i>
+        Products
+    </a>
+
+    <a href="inventory.php">
+        <i class="fas fa-box-open"></i>
+        Inventory
+    </a>
+
+    <a href="stock_alerts.php" class="active">
+        <i class="fas fa-triangle-exclamation"></i>
+        Stock Alerts
+    </a>
+
+    <div class="menu-title">
+    SALES
+    </div>
+
+    <a href="pos.php">
+        <i class="fas fa-cash-register"></i>
+        Point of Sale
+    </a>
+
+    <a href="sales_history.php">
+        <i class="fas fa-clock-rotate-left"></i>
+        Sales History
+    </a>
+
+    <a href="reports.php">
+        <i class="fas fa-chart-column"></i>
+        Reports
+    </a>
+  <a href="refund.php">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        Refund
+    </a>
+	
+	<a href="z_reading.php">
+    <i class="fas fa-file-invoice"></i>
+    Z Reading
 </a>
-
-<div class="menu-title">INVENTORY</div>
-
-<a href="products.php">
-<i class="fas fa-pills"></i> Products
-</a>
-
-<a href="stock_in.php">
-<i class="fas fa-box-open"></i> Stock In
-</a>
-
-<a href="stock_alerts.php" class="active">
-<i class="fas fa-triangle-exclamation"></i> Stock Alerts
-</a>
-
-<div class="menu-title">SALES</div>
-
-<a href="pos.php">
-<i class="fas fa-cash-register"></i> Point of Sales
-</a>
-
-<a href="sales_history.php">
-<i class="fas fa-clock"></i> Sales History
-</a>
-
-<a href="reports.php">
-<i class="fas fa-chart-column"></i> Reports
-</a>
-
 </div>
 
+
+<!-- MAIN -->
+
 <div class="main">
+
+
+<!-- HEADER -->
 
 <div class="header">
 
 <h1>Stock Alerts</h1>
 
 <div class="admin">
-<i class="fas fa-user"></i> Admin
+
+<i class="fas fa-user"></i>
+
+<?= htmlspecialchars($fullname); ?>
+
+</div>
+
+</div>
+
+
+<!-- SUMMARY -->
+
+<div class="cards">
+
+
+<div class="card">
+
+<div class="card-title">
+Total Alerts
+</div>
+
+<div class="card-value">
+<?= $totalAlerts; ?>
 </div>
 
 </div>
 
-<div class="topbar">
 
-<div class="filters">
+<div class="card">
 
-<button class="active-filter">Low Stock</button>
+<div class="card-title">
+Out of Stock
+</div>
 
-<button>Expiring</button>
-
-<button>Expired</button>
+<div class="card-value">
+<?= $outOfStock; ?>
+</div>
 
 </div>
 
-<button class="export">
 
-<i class="fas fa-file-export"></i>
+<div class="card">
 
-Export Report
+<div class="card-title">
+Critical Stock
+</div>
+
+<div class="card-value">
+<?= $criticalStock; ?>
+</div>
+
+</div>
+
+
+<div class="card">
+
+<div class="card-title">
+Low Stock
+</div>
+
+<div class="card-value">
+<?= $lowStock; ?>
+</div>
+
+</div>
+
+</div>
+
+
+<!-- SEARCH / FILTER -->
+
+<div class="container">
+
+<form method="GET" class="search-form">
+
+
+<div class="group">
+
+<label>
+Search Product
+</label>
+
+<input
+type="text"
+name="search"
+placeholder="Search product or category..."
+value="<?= htmlspecialchars($search); ?>">
+
+</div>
+
+
+<div class="group">
+
+<label>
+Alert Level
+</label>
+
+<select name="filter">
+
+<option
+value="all"
+<?= $filter === 'all' ? 'selected' : ''; ?>>
+
+All Alerts
+
+</option>
+
+<option
+value="out"
+<?= $filter === 'out' ? 'selected' : ''; ?>>
+
+Out of Stock
+
+</option>
+
+<option
+value="critical"
+<?= $filter === 'critical' ? 'selected' : ''; ?>>
+
+Critical Stock
+
+</option>
+
+<option
+value="low"
+<?= $filter === 'low' ? 'selected' : ''; ?>>
+
+Low Stock
+
+</option>
+
+</select>
+
+</div>
+
+
+<button
+type="submit"
+class="search-btn">
+
+<i class="fas fa-search"></i>
+
+Search
 
 </button>
 
+
+<a
+href="stock_alerts.php"
+class="clear-btn">
+
+Clear
+
+</a>
+
+</form>
+
 </div>
 
-<table>
+
+<!-- ALERT TABLE -->
+
+<div class="container">
+
+<h3 style="
+color:#16246D;
+margin-bottom:20px;
+">
+
+<i class="fas fa-triangle-exclamation"></i>
+
+Products Requiring Attention
+
+</h3>
+
+
+<div class="table-wrapper">
+
+<table class="alert-table">
+
+<thead>
 
 <tr>
 
 <th>Product Name</th>
+
 <th>Category</th>
-<th>Stock</th>
+
+<th>Current Stock</th>
+
+<th>Alert Level</th>
+
 <th>Expiry Date</th>
-<th>Status</th>
+
 <th>Action</th>
 
 </tr>
 
-<?php
+</thead>
 
-$alerts=[
 
-["Paracetamol","Tablet",8,"2027-05-15","Low"],
-["Amoxicillin","Capsule",5,"2026-09-12","Critical"],
-["Vitamin C","Tablet",25,"2026-08-02","Expiring"],
-["Ibuprofen","Capsule",0,"2025-11-20","Expired"]
+<tbody>
 
-];
 
-foreach($alerts as $row){
-
-$statusClass="";
-
-if($row[4]=="Low") $statusClass="low";
-if($row[4]=="Critical") $statusClass="expired";
-if($row[4]=="Expiring") $statusClass="expiring";
-if($row[4]=="Expired") $statusClass="expired";
-
-echo "
+<?php if (empty($products)): ?>
 
 <tr>
 
-<td>$row[0]</td>
+<td
+colspan="6"
+class="empty">
 
-<td>$row[1]</td>
+<i
+class="fas fa-circle-check"
+style="font-size:30px;margin-bottom:10px;">
+</i>
 
-<td>$row[2]</td>
+<br>
 
-<td>$row[3]</td>
-
-<td class='$statusClass'>$row[4]</td>
-
-<td>
-
-<a href='#' class='view'>
-View
-</a>
+No stock alerts found.
 
 </td>
 
 </tr>
 
-";
+
+<?php else: ?>
+
+
+<?php foreach ($products as $product): ?>
+
+<?php
+
+$stock = (int)$product['stock'];
+
+if ($stock === 0) {
+
+    $alertText = 'Out of Stock';
+    $alertClass = 'badge-out';
+
+}
+elseif ($stock <= 5) {
+
+    $alertText = 'Critical';
+    $alertClass = 'badge-critical';
+
+}
+else {
+
+    $alertText = 'Low Stock';
+    $alertClass = 'badge-low';
 
 }
 
 ?>
 
+
+<tr>
+
+
+<td>
+
+<strong>
+
+<?= htmlspecialchars($product['name']); ?>
+
+</strong>
+
+</td>
+
+
+<td>
+
+<?= htmlspecialchars(
+    $product['category'] ?? 'Uncategorized'
+); ?>
+
+</td>
+
+
+<td>
+
+<span class="stock-number">
+
+<?= $stock; ?>
+
+</span>
+
+</td>
+
+
+<td>
+
+<span class="badge <?= $alertClass; ?>">
+
+<?= $alertText; ?>
+
+</span>
+
+</td>
+
+
+<td>
+
+<?php if (!empty($product['expiry_date'])): ?>
+
+<?= date(
+    'M d, Y',
+    strtotime($product['expiry_date'])
+); ?>
+
+<?php else: ?>
+
+N/A
+
+<?php endif; ?>
+
+</td>
+
+
+<td>
+
+<a
+href="edit.php?id=<?= (int)$product['medicine_id']; ?>"
+class="action-btn">
+
+<i class="fas fa-pen"></i>
+
+Manage Stock
+
+</a>
+
+</td>
+
+
+</tr>
+
+<?php endforeach; ?>
+
+
+<?php endif; ?>
+
+
+</tbody>
+
 </table>
+
+</div>
+
+</div>
 
 </div>
 
 </body>
 
 </html>
+
