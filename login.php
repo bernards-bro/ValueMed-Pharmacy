@@ -9,10 +9,6 @@ if (session_status() === PHP_SESSION_NONE) {
 /*
     If already logged in, go directly to POS.
 */
-if (isset($_SESSION['id'])) {
-    header("Location: pos.php");
-    exit;
-}
 
 $error = "";
 
@@ -215,8 +211,42 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             text-align: center;
 
             font-size: 14px;
-        }
 
+        }
+        .register-button {
+
+    display: block;
+
+    width: 100%;
+
+    margin-top: 12px;
+
+    padding: 13px;
+
+    border-radius: 8px;
+
+    background: #EEF4FF;
+
+    color: #16246D;
+
+    text-align: center;
+
+    text-decoration: none;
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    transition: .3s;
+
+}
+
+
+.register-button:hover {
+
+    background: #dce8ff;
+
+}
     </style>
 
 </head>
@@ -278,13 +308,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
 
             <button
-                type="submit"
-                class="login-button">
+    type="submit"
+    class="login-button">
 
-                <i class="fas fa-sign-in-alt"></i>
-                Login
+    <i class="fas fa-sign-in-alt"></i>
+    Login
 
-            </button>
+</button>
+
+
+<a
+    href="register.php"
+    class="register-button">
+
+    <i class="fas fa-user-plus"></i>
+    Create Account
+
+</a>
 
         </form>
 
