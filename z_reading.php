@@ -407,24 +407,37 @@ body {
 }
 
 
-.admin {
+.admin{
+    background:white;
+    padding:10px 18px;
+    border-radius:30px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-weight:600;
+}
 
-    background: white;
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
 
-    padding:
-        10px
-        20px;
+.logout-btn{
+    background:#16246D;
+    color:white;
+    padding:9px 15px;
+    border-radius:20px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:.3s;
+}
 
-    border-radius: 30px;
-
-    box-shadow:
-        0
-        5px
-        10px
-        rgba(0,0,0,.08);
-
-    color: #333;
-
+.logout-btn:hover{
+    background:#8FB3E2;
+    color:#16246D;
 }
 
 
@@ -994,27 +1007,21 @@ body {
 
 <div class="main">
 
+<div class="header">
+<h1>Z Reading</h1>
 
-    <!-- HEADER -->
-
-    <div class="header">
-
-        <h1>
-            Z-Reading
-        </h1>
-
-
-        <div class="admin">
-
-            <i class="fas fa-user"></i>
-
-            <?= htmlspecialchars(
-                $fullname
-            ); ?>
-
-        </div>
-
+<div class="header-right">
+    <div class="admin">
+        <i class="fas fa-user"></i>
+<?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
     </div>
+
+    <a href="logout.php" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+    </a>
+</div>
+</div>
 
 
 

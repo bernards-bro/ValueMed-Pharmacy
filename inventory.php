@@ -220,6 +220,31 @@ body{
     font-weight:600;
 }
 
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logout-btn{
+    background:#16246D;
+    color:white;
+    padding:9px 15px;
+    border-radius:20px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:.3s;
+}
+
+.logout-btn:hover{
+    background:#8FB3E2;
+    color:#16246D;
+}
+
 
 /* =========================
    CONTAINER
@@ -626,16 +651,22 @@ tr:hover{
 ========================= -->
 
 <div class="main">
-    <div class="header">
-        <h1>INVENTORY</h1>
-        <div class="admin">
 
-    <i class="fas fa-user"></i>
+<div class="header">
+<h1>Inventory</h1>
 
-    <?= htmlspecialchars($fullname); ?>
-
-</div>
+<div class="header-right">
+    <div class="admin">
+        <i class="fas fa-user"></i>
+<?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
     </div>
+
+    <a href="logout.php" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+    </a>
+</div>
+</div>
 
     <div class="container">
         <div class="top-section">

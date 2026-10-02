@@ -116,10 +116,36 @@ margin-bottom:25px;
 }
 
 .admin{
-background:white;
-padding:10px 20px;
-border-radius:30px;
-box-shadow:0 5px 10px rgba(0,0,0,.08);
+    background:white;
+    padding:10px 18px;
+    border-radius:30px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-weight:600;
+}
+
+.header-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logout-btn{
+    background:#16246D;
+    color:white;
+    padding:9px 15px;
+    border-radius:20px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    transition:.3s;
+}
+
+.logout-btn:hover{
+    background:#8FB3E2;
+    color:#16246D;
 }
 
 /* Top */
@@ -440,17 +466,19 @@ background:#f5f7fc;
 <div class="main">
 
 <div class="header">
-
 <h1>Products</h1>
 
-<div class="admin">
+<div class="header-right">
+    <div class="admin">
+        <i class="fas fa-user"></i>
+<?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
+    </div>
 
-    <i class="fas fa-user"></i>
-
-    <?= htmlspecialchars($fullname); ?>
-
+    <a href="logout.php" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+    </a>
 </div>
-
 </div>
 
 <div class="top">

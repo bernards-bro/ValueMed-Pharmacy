@@ -904,10 +904,11 @@ color:#16246D;
 }
 
 .admin{
-background:white;
-padding:10px 20px;
-border-radius:30px;
-box-shadow:0 5px 15px rgba(0,0,0,.08);
+    background:white;
+    padding:10px 18px;
+    border-radius:30px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+    font-weight:600;
 }
 
 .header-right{
@@ -1603,23 +1604,19 @@ input[type="number"] {
 <div class="main">
 
 <div class="header">
+<h1>Point of Sales</h1>
 
-    <h1>Point of Sale</h1>
-
-    <div class="header-right">
-
-        <div class="admin">
-            <i class="fas fa-user"></i>
-            <?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
-        </div>
-
-        <a href="logout.php" class="logout-btn">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </a>
-
+<div class="header-right">
+    <div class="admin">
+        <i class="fas fa-user"></i>
+<?php echo htmlspecialchars($_SESSION['fullname'] ?? 'Admin'); ?>
     </div>
 
+    <a href="logout.php" class="logout-btn">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+    </a>
+</div>
 </div>
 
 <!-- Messages -->
